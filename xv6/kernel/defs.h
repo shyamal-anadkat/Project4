@@ -109,7 +109,9 @@ void            userinit(void);
 int             wait(void);
 void            wakeup(void*);
 void            yield(void);
-
+//p4 support
+int             clone(void (*fn)(void*), void* arg, void* ustack);
+int             join(void** ustack);
 // swtch.S
 void            swtch(struct context**, struct context*);
 

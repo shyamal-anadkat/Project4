@@ -407,6 +407,28 @@ kill(int pid)
   return -1;
 }
 
+//p4 support funcs
+/*
+clone() should return the pid of the newly-created thread to the parent, 
+start the new thread with a call to the function fn, 
+passing the provided argument arg
+*/
+int clone(void (*fn)(void*), void* arg, void* ustack) {
+  //TODO
+
+
+  return -1;
+}
+
+int join(void** ustack) {
+  //TODO
+
+  
+  return -1;
+}
+
+
+
 // Print a process listing to console.  For debugging.
 // Runs when user types ^P on console.
 // No lock to avoid wedging a stuck machine further.
