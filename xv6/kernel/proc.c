@@ -416,8 +416,63 @@ passing the provided argument arg
 int clone(void (*fn)(void*), void* arg, void* ustack) {
   //TODO
 
+  // same as fork 
+  int i, pid;
+  struct proc *np;
+  void *stk_arg, *ret;
 
-  return -1;
+  // Allocate new thread 
+  if((np = allocproc()) == 0)
+    return -1;
+
+  np->pgdir = proc->pgdir; //pgdir same as of proc 
+  np->sz = proc->sz;       //same as parent proc
+  np->parent = proc;
+  *np->tf = *proc->tf;
+  np->tf->eax = 0;
+  
+  
+  ret = ustack + PGSIZE - 2 * sizeof(uint);
+  *(uint *)ret = 0xffffffff;
+
+  stk_arg = ustack + PGSIZE - sizeof(uint);
+  *(uint *)stk_arg = (uint)arg;
+
+  np->tf->esp = (uint)ustack + PGSIZE - 2*sizeof(uint);
+  //memmove((void *)np->tf->esp, ustack, PGSIZE);
+  //np->tf->esp += PGSIZE - 2 * sizeof(void *);
+  np->tf->ebp = np->tf->esp;
+  np->tf->eip = (int)fn;
+
+
+
+
+  //sp = (uint*)((char *)ustack + PGSIZE); //stack pointer 
+  //cpyout stuff 
+  //sp = sp - 2; 
+  //sp[0] = 0xFFFFFFFF; //fake ret PC 
+  //sp[1] = (uint) arg; 
+
+  //todo stuff 
+  //initialize stack with fake return 
+  // start instr here 
+  //memmove ((void*) ustack, ustack, PGSIZE);
+  //np->tf->esp = (uint) sp;         //stack pointer 
+  //np->tf->ebp = np->tf->esp;
+  //np->tf->eip = (uint) fn;         //instruction pointer 
+  //np->tf->eax = 0;   //fork ret 0
+
+  //copy file descriptors, from fork()
+  for(i = 0; i < NOFILE; i++)
+    if(proc->ofile[i])
+      np->ofile[i] = filedup(proc->ofile[i]);
+  np->cwd = idup(proc->cwd);
+ 
+  pid = np->pid;
+  np->state = RUNNABLE;
+  safestrcpy(np->name, proc->name, sizeof(proc->name));
+  cprintf("%d", pid);
+  return pid;
 }
 
 int join(void** ustack) {
