@@ -414,78 +414,94 @@ start the new thread with a call to the function fn,
 passing the provided argument arg
 */
 int clone(void (*fn)(void*), void* arg, void* ustack) {
-  //TODO
 
-  //cprintf("HELLOOOO");
-  // same as fork 
-  int i, pid;
-  struct proc *np;
-  void *stk_arg, *ret;
-  
+  int i;
+  int pid;
+  struct proc* np;
+  void* sarg;
+  void* retPC;
 
-  // Allocate new thread 
+  //check page-aligned
+  if((uint)ustack % PGSIZE)
+    return -1;
+  if((uint)ustack + PGSIZE > proc->sz)
+    return -1;
+
+  //allocate the process
   if((np = allocproc()) == 0)
     return -1;
-  uint ebp = np->tf->ebp;
-  np->pgdir = proc->pgdir; //pgdir same as of proc 
-  np->sz = proc->sz;       //same as parent proc
+
+  //same as fork 
   np->parent = proc;
+  np->pgdir = proc->pgdir;
+  np->sz = proc->sz;
   *np->tf = *proc->tf;
-  np->tf->eax = 0;
-  
-  
-  ret = ustack + PGSIZE - sizeof(uint);
-  *(uint *)ret = 0xffffffff;
+  np->stack = ustack;
 
-  stk_arg = ret - sizeof(void*);
-  *(uint *)stk_arg = (uint)arg;
-
-  np->tf->esp = (uint)stk_arg;
-  //memmove((void *)np->tf->esp, ustack, PGSIZE);
-  //np->tf->esp += PGSIZE - 2 * sizeof(void *);
+  //set the fake return PC
+  retPC = ustack + PGSIZE - (2 * sizeof(void *)); //leave room for these 2
+  *(uint*) retPC = 0xffffffff;
+  sarg = ustack + PGSIZE - sizeof(void *);
+  *(uint*) sarg = (uint) arg;
+  
+  //stack pointer setup stuff 
+  np->tf->esp = (uint) ustack;
+  np->tf->esp += PGSIZE - (2 * sizeof(void*));
   np->tf->ebp = np->tf->esp;
-  np->tf->eip = (int)fn;
+  np->tf->eip = (uint) fn;
 
-
-
-
-  //sp = (uint*)((char *)ustack + PGSIZE); //stack pointer 
-  //cpyout stuff 
-  //sp = sp - 2; 
-  //sp[0] = 0xFFFFFFFF; //fake ret PC 
-  //sp[1] = (uint) arg; 
-
-  //todo stuff 
-  //initialize stack with fake return 
-  // start instr here 
-  //memmove ((void*) ustack, ustack, PGSIZE);
-  //np->tf->esp = (uint) sp;         //stack pointer 
-  //np->tf->ebp = np->tf->esp;
-  //np->tf->eip = (uint) fn;         //instruction pointer 
-  //np->tf->eax = 0;   //fork ret 0
-
-  //copy file descriptors, from fork()
+  //from fork again - fd 
   for(i = 0; i < NOFILE; i++)
     if(proc->ofile[i])
       np->ofile[i] = filedup(proc->ofile[i]);
   np->cwd = idup(proc->cwd);
- 
+
+  np->tf->eax = 0;
   pid = np->pid;
   np->state = RUNNABLE;
   safestrcpy(np->name, proc->name, sizeof(proc->name));
-
-  np->tf->ebp = ebp; //restore ebp
   return pid;
 }
 
 int join(void** ustack) {
-  //TODO
 
-  
-  return -1;
+  //lot of stuff same as wait 
+  struct proc *p;
+  int havekids, pid;
+  acquire(&ptable.lock);
+
+  for(;;){
+    havekids = 0; 
+    
+    //looking for zombie children
+     for (p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
+      if (p->parent != proc || p->pgdir != proc->pgdir || proc->pid == p->pid)
+        continue;
+      havekids = 1;
+      if(p->state == ZOMBIE){
+        pid = p->pid;
+        kfree(p->kstack);
+        p->kstack = 0;
+        *ustack = (void *)p->stack;
+        p->state = UNUSED;
+        p->pid = 0;
+        p->parent = 0;
+        p->name[0] = 0;
+        p->killed = 0;
+        release(&ptable.lock);
+        return pid;
+      }
+    }
+
+    //don't have kids
+    if(!havekids || proc->killed){
+      release(&ptable.lock);
+      return -1;
+    }
+
+    sleep(proc, &ptable.lock);
+  }
 }
-
-
 
 // Print a process listing to console.  For debugging.
 // Runs when user types ^P on console.
@@ -522,5 +538,4 @@ procdump(void)
     cprintf("\n");
   }
 }
-
 

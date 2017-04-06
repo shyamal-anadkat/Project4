@@ -1,0 +1,7 @@
+See the comment toward the top of each *.c file for info on what it
+should do and what arguments to give it.
+
+As always, doing your own more extensive testing is recommended -- you
+could use these as a basis for doing so (e.g. adding more
+producer/consumer threads to the part4 tests, perhaps playing around
+with inserting sleep() calls to change execution timing, ...).

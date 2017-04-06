@@ -20,6 +20,10 @@ USER_PROGS := \
 	clone\
 	clone2\
 	clone3\
+	join\
+	join2\
+	join3\
+	join4
 
 USER_PROGS := $(addprefix user/, $(USER_PROGS))
 

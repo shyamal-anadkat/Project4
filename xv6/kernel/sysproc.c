@@ -93,11 +93,23 @@ sys_uptime(void)
 int 
 sys_clone(void)
 {
-  return -1; 
+  void* arg;
+  void* ustack;
+  void* fn;
+
+  if(argptr(1, (char**)&arg, sizeof(arg)) < 0 || argptr(2, (char**)&ustack, sizeof(ustack)) < 0 || argptr(0, (char**)&fn, sizeof(fn)) < 0)
+    return -1;
+
+  return clone(fn, arg, ustack);
 }
 
 int 
 sys_join(void)
 {
-  return -1; 
+  void** ustack;
+
+  if(argptr(0, (char**)&ustack, sizeof(ustack)) < 0)
+    return -1;
+  
+  return join(ustack);
 }

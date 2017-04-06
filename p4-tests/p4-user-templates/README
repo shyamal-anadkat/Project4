@@ -1,0 +1,11 @@
+Copy these files into the user/ directory of your xv6 code.
+
+Fill in the parts commented "fill this in!".  (You may need some other
+small tweaks here and there, and can of course add whatever other
+functions you like.)
+
+You'll need to add spinlock.o, threads.o, condvar.o, mutex.o, and
+semaphore.o to the USER_LIBS variable in user/makefile.mk.
+
+You'll also need to add #include directives for spinlock.h, threads.h,
+condvar.h, mutex.h, and semaphore.h to user/user.h.
