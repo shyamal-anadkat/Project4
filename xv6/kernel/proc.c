@@ -416,15 +416,17 @@ passing the provided argument arg
 int clone(void (*fn)(void*), void* arg, void* ustack) {
   //TODO
 
+  //cprintf("HELLOOOO");
   // same as fork 
   int i, pid;
   struct proc *np;
   void *stk_arg, *ret;
+  
 
   // Allocate new thread 
   if((np = allocproc()) == 0)
     return -1;
-
+  uint ebp = np->tf->ebp;
   np->pgdir = proc->pgdir; //pgdir same as of proc 
   np->sz = proc->sz;       //same as parent proc
   np->parent = proc;
@@ -432,13 +434,13 @@ int clone(void (*fn)(void*), void* arg, void* ustack) {
   np->tf->eax = 0;
   
   
-  ret = ustack + PGSIZE - 2 * sizeof(uint);
+  ret = ustack + PGSIZE - sizeof(uint);
   *(uint *)ret = 0xffffffff;
 
-  stk_arg = ustack + PGSIZE - sizeof(uint);
+  stk_arg = ret - sizeof(void*);
   *(uint *)stk_arg = (uint)arg;
 
-  np->tf->esp = (uint)ustack + PGSIZE - 2*sizeof(uint);
+  np->tf->esp = (uint)stk_arg;
   //memmove((void *)np->tf->esp, ustack, PGSIZE);
   //np->tf->esp += PGSIZE - 2 * sizeof(void *);
   np->tf->ebp = np->tf->esp;
@@ -471,7 +473,8 @@ int clone(void (*fn)(void*), void* arg, void* ustack) {
   pid = np->pid;
   np->state = RUNNABLE;
   safestrcpy(np->name, proc->name, sizeof(proc->name));
-  cprintf("%d", pid);
+
+  np->tf->ebp = ebp; //restore ebp
   return pid;
 }
 
