@@ -3,7 +3,8 @@
 #define SPINLOCK_H
 
 struct spinlock {
-	/* fill this in! */
+	unsigned int ticket;
+	unsigned int service;
 };
 
 void spin_init(struct spinlock* lk);

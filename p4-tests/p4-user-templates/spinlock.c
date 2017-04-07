@@ -4,15 +4,17 @@
 
 void spin_init(struct spinlock* lk)
 {
-	/* fill this in! */
+	sl->ticket = sl->service = 0;
 }
 
 void spin_lock(struct spinlock *lk)
 {
-	/* fill this in! */
+	unsigned int myticket = XADD(&sl->ticket, 1);
+	while (sl->service != myticket)
+		/* spin */;
 }
 
 void spin_unlock(struct spinlock *lk)
 {
-	/* fill this in! */
+	XADD(&sl->service, 1);
 }
