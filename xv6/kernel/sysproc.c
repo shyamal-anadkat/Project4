@@ -113,3 +113,23 @@ sys_join(void)
   
   return join(ustack);
 }
+
+int
+sys_park(void){
+    park();
+    return 0;
+}
+
+int
+sys_unpark(void){
+    int pid;
+    if(argint(0, &pid) < 0)
+        return -1;
+    return unpark(pid);
+}
+
+int
+sys_setpark(void){
+    setpark();
+    return 0;
+}

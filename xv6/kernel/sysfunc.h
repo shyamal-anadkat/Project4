@@ -25,5 +25,8 @@ int sys_write(void);
 int sys_uptime(void);
 int sys_clone(void); //p4
 int sys_join(void);  //p4
+int sys_park(void);  //p4
+int sys_setpark(void); //p4
+int sys_unpark(void);  //p4
 
 #endif // _SYSFUNC_H_

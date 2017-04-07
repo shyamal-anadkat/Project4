@@ -503,6 +503,22 @@ int join(void** ustack) {
   }
 }
 
+
+
+void park(void) {
+//TODO
+
+}
+int setpark(void) {
+//TODO
+  return -1;
+}
+int unpark(int pid) {
+//TODO
+
+  return -1; 
+}
+
 // Print a process listing to console.  For debugging.
 // Runs when user types ^P on console.
 // No lock to avoid wedging a stuck machine further.
