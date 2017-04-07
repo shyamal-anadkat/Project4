@@ -439,7 +439,7 @@ int clone(void (*fn)(void*), void* arg, void* ustack) {
   np->stack = ustack;
 
   //set the fake return PC
-  retPC = ustack + PGSIZE - (2 * sizeof(void *)); //leave room for these 2
+  retPC = ustack + PGSIZE - (2 * sizeof(void *)); 
   *(uint*) retPC = 0xffffffff;
   sarg = ustack + PGSIZE - sizeof(void *);
   *(uint*) sarg = (uint) arg;
@@ -452,7 +452,7 @@ int clone(void (*fn)(void*), void* arg, void* ustack) {
 
   //from fork again - fd 
   for(i = 0; i < NOFILE; i++)
-    if(proc->ofile[i])
+  if(proc->ofile[i])
       np->ofile[i] = filedup(proc->ofile[i]);
   np->cwd = idup(proc->cwd);
 

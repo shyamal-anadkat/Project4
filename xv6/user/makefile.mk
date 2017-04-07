@@ -33,7 +33,8 @@ USER_LIBS := \
 	usys.o\
 	printf.o\
 	umalloc.o\
-	spinlock.o
+	spinlock.o\
+	threads.o
 
 USER_LIBS := $(addprefix user/, $(USER_LIBS))
 
