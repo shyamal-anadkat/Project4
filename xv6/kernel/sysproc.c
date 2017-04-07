@@ -97,7 +97,7 @@ sys_clone(void)
   void* ustack;
   void* fn;
 
-  if(argptr(1, (char**)&arg, sizeof(arg)) < 0 || argptr(2, (char**)&ustack, sizeof(ustack)) < 0 || argptr(0, (char**)&fn, sizeof(fn)) < 0)
+  if(argptr(1, (void*)&arg, sizeof(arg)) < 0 || argptr(2, (void*)&ustack, sizeof(ustack)) < 0 || argptr(0, (void*)&fn, sizeof(fn)) < 0)
     return -1;
 
   return clone(fn, arg, ustack);
@@ -108,7 +108,7 @@ sys_join(void)
 {
   void** ustack;
 
-  if(argptr(0, (char**)&ustack, sizeof(ustack)) < 0)
+  if(argptr(0, (void*)&ustack, sizeof(ustack)) < 0)
     return -1;
   
   return join(ustack);

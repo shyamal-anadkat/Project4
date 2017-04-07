@@ -24,7 +24,9 @@ USER_PROGS := \
 	join2\
 	join3\
 	join4\
-	part2
+	part2\
+	part4-cv\
+	part4-sem
 	
 
 USER_PROGS := $(addprefix user/, $(USER_PROGS))
@@ -36,7 +38,10 @@ USER_LIBS := \
 	printf.o\
 	umalloc.o\
 	spinlock.o\
-	threads.o
+	threads.o\
+	condvar.o\
+	mutex.o\
+	semaphore.o 
 
 USER_LIBS := $(addprefix user/, $(USER_LIBS))
 

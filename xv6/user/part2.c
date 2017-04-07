@@ -1,8 +1,6 @@
 #include "types.h"
 #include "stat.h"
 #include "user.h"
-#include "spinlock.h"
-#include "threads.h"
 
 /*
  * Takes two command-line arguments: the number of threads and the number of
