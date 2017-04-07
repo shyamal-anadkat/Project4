@@ -23,7 +23,9 @@ USER_PROGS := \
 	join\
 	join2\
 	join3\
-	join4
+	join4\
+	part2
+	
 
 USER_PROGS := $(addprefix user/, $(USER_PROGS))
 
