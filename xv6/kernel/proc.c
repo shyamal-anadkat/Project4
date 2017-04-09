@@ -67,6 +67,7 @@ found:
   p->context = (struct context*)sp;
   memset(p->context, 0, sizeof *p->context);
   p->context->eip = (uint)forkret;
+
   p->isParked = 0;
   p->setPark = 0;
   p->isThread = 0; 
@@ -218,7 +219,7 @@ wait(void)
     // Scan through table looking for zombie children.
     havekids = 0;
     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
-      if(p->parent != proc)
+      if(p->parent != proc || p->isThread)
         continue;
       havekids = 1;
       if(p->state == ZOMBIE){
@@ -453,6 +454,8 @@ int clone(void (*fn)(void*), void* arg, void* ustack) {
   np->tf->ebp = np->tf->esp;
   np->tf->eip = (uint) fn;
 
+  np->isThread = 1;    //set thread 
+
   //from fork again - fd 
   for(i = 0; i < NOFILE; i++)
   if(proc->ofile[i])
@@ -483,8 +486,8 @@ int join(void** ustack) {
       havekids = 1;
       if(p->state == ZOMBIE){
         pid = p->pid;
-        kfree(p->kstack);
-        p->kstack = 0;
+        //kfree(p->kstack); // ?? SHOULD WE KFREE here, salil ?
+        //p->kstack = 0;
         *ustack = (void *)p->stack;
         p->state = UNUSED;
         p->pid = 0;
@@ -506,43 +509,41 @@ int join(void** ustack) {
   }
 }
 
-// puts to sleep
 void park(void) {
-  // put thread to sleep and add to queue
   proc->isParked = 1;
   if (proc->setPark){
-    //sleep( (void*) proc->pid, &ptable.lock);
+    sleep( (void*) proc->pid, &ptable.lock);
   }
 }
 
 // indicates a thread is about to park 
 int setpark(void) {
- //TODO
+ 
   if(proc->setPark) {
     return -1; 
   }
+
   proc->setPark = 1; 
-  return 0;
+  return 0;   //success
 }
 
 // wakes up thread by pid 
 int unpark(int pid) {
-  //struct proc *p;
+  struct proc *p;
 
-  //if try to unpark a thread already parked 
   if(!proc->isParked) 
         return -1; 
 
   proc->isParked = 0; 
-  /*for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
     if (p->pgdir == proc->pgdir && p->isThread != 0 && p->setPark == 1){
       p->setPark = 0;
       break;
     }
-  }*/
+  }
 
   //wake up 
-  //wakeup((void*)pid);
+  wakeup((void*)pid);
   return 0; 
 }
 
