@@ -67,6 +67,9 @@ found:
   p->context = (struct context*)sp;
   memset(p->context, 0, sizeof *p->context);
   p->context->eip = (uint)forkret;
+  p->isParked = 0;
+  p->setPark = 0;
+  p->isThread = 0;
 
   return p;
 }
@@ -450,6 +453,7 @@ int clone(void (*fn)(void*), void* arg, void* ustack) {
   np->tf->ebp = np->tf->esp;
   np->tf->eip = (uint) fn;
   np->isThread = 1;
+
   //from fork again - fd 
   for(i = 0; i < NOFILE; i++)
   if(proc->ofile[i])
@@ -536,6 +540,7 @@ int unpark(int pid) {
       p->setPark = 0;
       break;
     }
+  }
 
   //wake up 
   wakeup((void*)pid);

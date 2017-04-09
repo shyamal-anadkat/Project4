@@ -31,6 +31,12 @@ main(int argc, char *argv[])
      stack = stack + (4096 - (uint)stack % PGSIZE);
 
    int clone_pid = clone(worker, (void*)&arg, stack);
+   int clone_pid2 = clone(worker, (void*)&arg, stack);
+
+   printf(1, "TID: %d\n", clone_pid);
+   printf(1, "TID2: %d\n", clone_pid2);
+   printf(1,"PPID: %d\n", ppid);
+   
    assert(clone_pid > 0);
    while(global != 55);
    assert(arg == 1);
