@@ -34,6 +34,9 @@ int uptime(void);
 //***p4 system calls***
 int clone(void (*fn)(void*), void* arg, void* ustack);
 int join(void** ustack);
+void park(void);
+int setpark(void);
+int unpark(int pid);
 
 // user library functions (ulib.c)
 int stat(char*, struct stat*);

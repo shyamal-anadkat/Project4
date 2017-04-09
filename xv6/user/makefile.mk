@@ -26,7 +26,9 @@ USER_PROGS := \
 	join4\
 	part2\
 	part4-cv\
-	part4-sem
+	part4-sem\
+	part3\
+	setparkTest
 	
 
 USER_PROGS := $(addprefix user/, $(USER_PROGS))

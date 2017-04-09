@@ -1,6 +1,6 @@
-/*
 #include "types.h"
 #include "user.h"
+#include "x86.h"
 
 void mutex_init(struct mutex* mtx)
 {
@@ -33,9 +33,8 @@ void mutex_unlock(struct mutex* mtx)
    // if (queue_empty(mtx->q)) {
    //     mtx->flag = 0; // let go of lock; no one wants it
    //}
-    else {
+    //else {
         //unpark(queue_remove(mtx->q)); // hold lock (for next thread!)
-    }
+    //}
     mtx->guard = 0;
 }
-*/
