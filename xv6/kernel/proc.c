@@ -69,7 +69,7 @@ found:
   p->context->eip = (uint)forkret;
   p->isParked = 0;
   p->setPark = 0;
-  p->isThread = 0;
+  p->isThread = 0; 
 
   return p;
 }
@@ -452,7 +452,6 @@ int clone(void (*fn)(void*), void* arg, void* ustack) {
   np->tf->esp += PGSIZE - (2 * sizeof(void*));
   np->tf->ebp = np->tf->esp;
   np->tf->eip = (uint) fn;
-  np->isThread = 1;
 
   //from fork again - fd 
   for(i = 0; i < NOFILE; i++)
@@ -512,7 +511,7 @@ void park(void) {
   // put thread to sleep and add to queue
   proc->isParked = 1;
   if (proc->setPark){
-    sleep( (void*) proc->pid, &ptable.lock);
+    //sleep( (void*) proc->pid, &ptable.lock);
   }
 }
 
@@ -528,22 +527,22 @@ int setpark(void) {
 
 // wakes up thread by pid 
 int unpark(int pid) {
-  struct proc *p;
+  //struct proc *p;
 
   //if try to unpark a thread already parked 
   if(!proc->isParked) 
         return -1; 
 
   proc->isParked = 0; 
-  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+  /*for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
     if (p->pgdir == proc->pgdir && p->isThread != 0 && p->setPark == 1){
       p->setPark = 0;
       break;
     }
-  }
+  }*/
 
   //wake up 
-  wakeup((void*)pid);
+  //wakeup((void*)pid);
   return 0; 
 }
 
