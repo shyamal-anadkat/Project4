@@ -12,7 +12,7 @@ void mutex_init(struct mutex* mtx)
 // TODO remove comments
 void mutex_lock(struct mutex* mtx)
 {
-	while(xchg(&mtx->guard, 1) != 0);
+	//while(xchg(&mtx->guard, 1) != 0);
 	//while (TestAndSet(&mtx->guard, 1) == 1) ; //acquire guard lock by spinning
     if (mtx->flag == 0) {
         mtx->flag = 1;
@@ -28,7 +28,7 @@ void mutex_lock(struct mutex* mtx)
 
 void mutex_unlock(struct mutex* mtx)
 {
-	while (xchg(&mtx->guard, 1) != 0);
+	//while (xchg(&mtx->guard, 1) != 0);
 	//while (TestAndSet(&mtx->guard, 1) == 1); //acquire guard lock by spinning
    // if (queue_empty(mtx->q)) {
    //     mtx->flag = 0; // let go of lock; no one wants it
