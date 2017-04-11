@@ -62,6 +62,5 @@ int main()
  
   printf(1, "status = %d\n", status);
 
-
   exit();
 }

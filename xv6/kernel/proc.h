@@ -78,6 +78,7 @@ struct proc {
   int isThread;
   int setPark;
   int isParked;
+  int unparkCalled;
 };
 
 // Process memory is laid out contiguously, low addresses first:

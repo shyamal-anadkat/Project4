@@ -71,6 +71,7 @@ found:
   p->isParked = 0;
   p->setPark = 0;
   p->isThread = 0; 
+  p->unparkCalled = 0;
 
   return p;
 }
@@ -510,40 +511,80 @@ int join(void** ustack) {
 }
 
 void park(void) {
-  proc->isParked = 1;
-  if (proc->setPark){
-    sleep( (void*) proc->pid, &ptable.lock);
+  cprintf("park called with pid %d\n", proc -> pid);
+  acquire(&ptable.lock);
+  if (proc->setPark) {
+    if (proc->unparkCalled == 1) {
+      release(&ptable.lock);
+      return;
+    }
+    else {
+      proc->isParked = 1;
+      // sleep((void*) proc->pid, &ptable.lock);
+      proc->unparkCalled = 0;
+      //proc->isParked = 0;
+      //proc->setPark = 0;
+      release(&ptable.lock);
+    }
   }
 }
 
 // indicates a thread is about to park 
 int setpark(void) {
- 
+  cprintf("set park called with pid %d\n", proc -> pid);
+  acquire(&ptable.lock);
   if(proc->setPark) {
+    release(&ptable.lock);
     return -1; 
   }
 
   proc->setPark = 1; 
+  release(&ptable.lock);
   return 0;   //success
 }
 
 // wakes up thread by pid 
 int unpark(int pid) {
+  //cprintf("unpark called with pid %d\n", pid);
+  acquire(&ptable.lock);
   struct proc *p;
 
-  if(!proc->isParked) 
-        return -1; 
+  // if(!proc->setPark)
+  // {
+  //       release(&ptable.lock);  
+  //       return -1;
+  // }
 
-  proc->isParked = 0; 
-  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
-    if (p->pgdir == proc->pgdir && p->isThread != 0 && p->setPark == 1){
+  // if(proc->isParked == 0) {
+  //     release(&ptable.lock);   
+  //     return 0;
+  // }
+
+  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
+    if (p->pid == pid && p->isThread){
+      p->unparkCalled = 1;
+      if(p->setPark == 0) {
+        //cprintf("**************************");
+      release(&ptable.lock);  
+      return -1;
+    }
+    if(p->isParked == 0) {
+      //cprintf("@@@@@@@@@@@@@@@@@@@@@@@@@");
+      release(&ptable.lock);   
+      return -1; //might need to change this
+    }
+      //cprintf("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$\n");
+      //wake up
+      // wakeup((void*)pid);
       p->setPark = 0;
-      break;
+      p->isParked = 0;
+      cprintf("pid: %d woken up\n", pid);
+      release(&ptable.lock);
+      return 0;
     }
   }
 
-  //wake up 
-  wakeup((void*)pid);
+  release(&ptable.lock);
   return 0; 
 }
 
