@@ -1,21 +1,17 @@
 #ifndef QUEUE_H
 #define QUEUE_H
 
-typedef struct queuenode {
-	void *data;
-	struct queuenode *next;
-} queuenode;
+struct Queue
+{
+    int front, rear, size;
+    unsigned capacity;
+    int* array;
+};
 
-typedef struct queue {
-	queuenode *head;
-	queuenode *tail;
-	int size;
-	//unsigned pending;
-	lock lock;
-} queue;
-
-void queue_init(queue *queue);
-int queue_push(queue *queue, void *data);
-void *queue_pop(queue *queue);
+struct Queue* initQueue(unsigned capacity);
+int isFull(struct Queue* queue);
+int isEmpty(struct Queue* queue);
+void enqueue(struct Queue* queue, int item);
+int dequeue(struct Queue* queue);
 
 #endif

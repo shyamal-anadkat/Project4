@@ -44,7 +44,8 @@ USER_LIBS := \
 	threads.o\
 	condvar.o\
 	mutex.o\
-	semaphore.o 
+	semaphore.o\
+	queue.o
 
 USER_LIBS := $(addprefix user/, $(USER_LIBS))
 

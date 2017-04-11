@@ -2,11 +2,13 @@
 #include "user.h"
 #include "x86.h"
 #include "mutex.h"
+#include "queue.h"
 
 void mutex_init(struct mutex* mtx)
 {
 	mtx->flag  = 0;
 	mtx->guard = 0;
+    mtx->queue = initQueue(1000);
     //queue_init(mtx->q);
 }
 
@@ -22,6 +24,7 @@ void mutex_lock(struct mutex* mtx)
 	}
 	else {
         //queue_add(mtx->q, gettid());
+        enqueue(mtx->queue, getpid());
         setpark();
         mtx->guard = 0;
         park();
@@ -32,11 +35,11 @@ void mutex_unlock(struct mutex* mtx)
 {
 	//acquire guard lock by spinning
     while (xchg((volatile uint*)&mtx->guard, 1) != 0);
-    //if (queue_empty(mtx->q)) {
+    if (isEmpty(mtx->queue)) {
         mtx->flag = 0; // let go of lock; no one wants it
-    //}
-    //else {
-        //unpark(queue_remove(mtx->q)); // hold lock (for next thread!)
-    //}
+    }
+    else {
+        unpark(dequeue(mtx->queue)); // hold lock (for next thread!)
+    }
     mtx->guard = 0;
 }
