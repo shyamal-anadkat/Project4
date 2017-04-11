@@ -9,6 +9,11 @@ int thread_create(void (*thfunc)(void*), void* arg)
 {
   void *ustack;
   ustack = malloc(2*PGSIZE);
+
+  //if malloc fails
+  if (ustack == 0) {
+    return -1; 
+  }
   
   //page align if not 
   if((uint)ustack % PGSIZE) {

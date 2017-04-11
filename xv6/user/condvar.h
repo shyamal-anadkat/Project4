@@ -1,9 +1,14 @@
-
 #ifndef CONDVAR_H
 #define CONDVAR_H
 
+#include "queue.h"
+#include "mutex.h"
+
 struct condvar {
 	/* fill this in! */
+	struct Queue* queue;
+	struct mutex mtx;
+
 };
 
 void cv_init(struct condvar* cv);

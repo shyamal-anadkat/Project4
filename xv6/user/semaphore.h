@@ -2,8 +2,15 @@
 #ifndef SEMAPHORE_H
 #define SEMAPHORE_H
 
+#include "queue.h"
+#include "mutex.h"
+#include "condvar.h"
+
 struct semaphore {
 	/* fill this in! */
+	struct condvar cond;
+	struct mutex mtx; 
+	int counter;
 };
 
 void sem_init(struct semaphore* sem, int initval);
