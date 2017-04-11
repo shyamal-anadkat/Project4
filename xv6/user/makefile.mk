@@ -20,15 +20,16 @@ USER_PROGS := \
 	clone\
 	clone2\
 	clone3\
+	badclone\
 	join\
 	join2\
 	join3\
 	join4\
 	part2\
-	part4-cv\
-	part4-sem\
 	part3\
-	setparkTest
+	setparkTest\
+	part4-cv\
+	part4-sem
 	
 
 USER_PROGS := $(addprefix user/, $(USER_PROGS))

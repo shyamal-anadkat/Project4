@@ -7,10 +7,8 @@
 
 int thread_create(void (*thfunc)(void*), void* arg)
 {
-  
-  /* fill this in! */
   void *ustack;
-  ustack = malloc(2*PGSIZE); // twice pagesize ???
+  ustack = malloc(2*PGSIZE);
   
   //page align if not 
   if((uint)ustack % PGSIZE) {
@@ -21,7 +19,6 @@ int thread_create(void (*thfunc)(void*), void* arg)
 
 int thread_join(void)
 {
-   /* fill this in! */
   void *ustack;
   int retVal =  join((&ustack));
   free(ustack);
