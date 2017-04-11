@@ -1,20 +1,21 @@
-#ifndef __QUEUE_H
-#define __QUEUE_H
+#ifndef QUEUE_H
+#define QUEUE_H
 
-typedef struct queuenode_t {
+typedef struct queuenode {
 	void *data;
-	struct queuenode_t *next;
-} queuenode_t;
+	struct queuenode *next;
+} queuenode;
 
-typedef struct queue_t {
-	queuenode_t *head;
-	queuenode_t *tail;
-	unsigned pending;
-	lock_t lock;
-} queue_t;
+typedef struct queue {
+	queuenode *head;
+	queuenode *tail;
+	int size;
+	//unsigned pending;
+	lock lock;
+} queue;
 
-void queue_init(queue_t *queue);
-int queue_push(queue_t *queue, void *data);
-void *queue_pop(queue_t *queue);
+void queue_init(queue *queue);
+int queue_push(queue *queue, void *data);
+void *queue_pop(queue *queue);
 
 #endif

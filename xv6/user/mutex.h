@@ -3,8 +3,6 @@
 #define MUTEX_H
 
 struct mutex {
-	// TODO remove comment
-	//pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
 	int flag;
 	int guard;
     //queue_t *q;
