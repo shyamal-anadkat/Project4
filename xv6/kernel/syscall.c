@@ -17,6 +17,7 @@
 int
 fetchint(struct proc *p, uint addr, int *ip)
 {
+  //TODO change to p->container->sz
   if(addr >= p->sz || addr+4 > p->sz)
     return -1;
   *ip = *(int*)(addr);
@@ -58,6 +59,8 @@ argptr(int n, char **pp, int size)
   
   if(argint(n, &i) < 0)
     return -1;
+
+  //TODO change proc->sz
   if((uint)i >= proc->sz || (uint)i+size > proc->sz)
     return -1;
   *pp = (char*)i;

@@ -79,6 +79,8 @@ struct proc {
   int setPark;
   int isParked;
   int unparkCalled;
+  struct proc *container;
+  //proc->container->sz;     //pointer to everything has same size
 };
 
 // Process memory is laid out contiguously, low addresses first:

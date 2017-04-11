@@ -49,6 +49,9 @@ sys_sbrk(void)
 
   if(argint(0, &n) < 0)
     return -1;
+  //this line will change
+  //add lock
+  //TODO
   addr = proc->sz;
   if(growproc(n) < 0)
     return -1;

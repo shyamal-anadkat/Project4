@@ -122,6 +122,31 @@ growproc(int n)
       return -1;
   }
   proc->sz = sz;
+
+  // to support part 2 : Zev's ambitions
+  // update thread size (with sane addr space)
+  // KIND OF WORKS ??
+  // MAKE IT ATOMIC
+
+  acquire(&ptable.lock);
+
+  struct proc *p;
+  if (proc->isThread) {
+    for (p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
+      if (p->pgdir == proc->pgdir && p->parent == proc->parent  && p->isThread)
+        p->sz = proc->sz;
+    }
+    proc->parent->sz = proc->sz; 
+  }
+  else { 
+  for (p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
+    if (p->pgdir == proc->pgdir && p->parent == proc && p->isThread)
+      p->sz = proc->sz;
+    }
+  }
+
+  release(&ptable.lock);
+
   switchuvm(proc);
   return 0;
 }
@@ -146,6 +171,9 @@ fork(void)
     np->state = UNUSED;
     return -1;
   }
+
+  //set np->container to point to np
+  //TODO
   np->sz = proc->sz;
   np->parent = proc;
   *np->tf = *proc->tf;
@@ -439,6 +467,11 @@ int clone(void (*fn)(void*), void* arg, void* ustack) {
   //same as fork 
   np->parent = proc;
   np->pgdir = proc->pgdir;
+
+  //TODO
+  //get rid of sz
+  //point np->container = proc
+  //point proc->container to proc
   np->sz = proc->sz;
   *np->tf = *proc->tf;
   np->stack = ustack;
@@ -495,6 +528,7 @@ int join(void** ustack) {
         p->parent = 0;
         p->name[0] = 0;
         p->killed = 0;
+        //p->isThread = 0;
         release(&ptable.lock);
         return pid;
       }
@@ -511,7 +545,7 @@ int join(void** ustack) {
 }
 
 void park(void) {
-  acquire(&ptable.lock);
+  //acquire(&ptable.lock);
   if (proc->setPark) {
     // set park called and then unpark
     if (proc->unparkCalled == 1) {
@@ -520,22 +554,23 @@ void park(void) {
     }
     else {
       proc->isParked = 1;
+      sleep((void*)proc->pid, &ptable.lock);
       proc->unparkCalled = 0;
-      release(&ptable.lock);
+      //release(&ptable.lock);
     }
   }
 }
 
 // indicates a thread is about to park 
 int setpark(void) {
-  acquire(&ptable.lock);
+  //acquire(&ptable.lock);
   if(proc->setPark) {
-    release(&ptable.lock);
+    //release(&ptable.lock);
     return -1; 
   }
 
   proc->setPark = 1; 
-  release(&ptable.lock);
+  //release(&ptable.lock);
   return 0;   //success
 }
 
@@ -558,9 +593,10 @@ int unpark(int pid) {
       }
       
       //wake up
+      release(&ptable.lock);
+      wakeup((void *) pid);
       p->setPark = 0;
       p->isParked = 0;
-      release(&ptable.lock);
       return 0;
     }
   }

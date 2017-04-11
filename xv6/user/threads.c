@@ -14,7 +14,8 @@ int thread_create(void (*thfunc)(void*), void* arg)
   if((uint)ustack % PGSIZE) {
   	ustack = ustack + (PGSIZE - (uint)ustack % PGSIZE);
   }
-  return (clone(thfunc, arg, ustack));
+
+  return (clone(thfunc, arg, (void*)ustack));
 }
 
 int thread_join(void)
