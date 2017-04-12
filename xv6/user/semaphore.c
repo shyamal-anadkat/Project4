@@ -3,7 +3,6 @@
 
 void sem_init(struct semaphore* sem, int initval)
 {
-	/* fill this in! */
 	mutex_init(&sem->mtx);            //lock init
 	sem->counter = initval; 		  //init counter to initVal
 	cv_init(&sem->cond);			  //init cv
@@ -14,7 +13,6 @@ void sem_init(struct semaphore* sem, int initval)
 
 void sem_wait(struct semaphore* sem)
 {
-	
 	mutex_lock(&sem->mtx);
 
 	while(sem->counter == 0) {
@@ -31,7 +29,7 @@ void sem_wait(struct semaphore* sem)
 void sem_post(struct semaphore* sem)
 {
 		mutex_lock(&sem->mtx);
-
+		
 		//increment sem value
 		sem->counter++;    
 

@@ -5,7 +5,6 @@
 #include "mutex.h"
 
 struct condvar {
-	/* fill this in! */
 	struct Queue* queue;
 	struct mutex mtx;
 

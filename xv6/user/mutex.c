@@ -9,7 +9,6 @@ void mutex_init(struct mutex* mtx)
 	mtx->flag  = 0;
 	mtx->guard = 0;
     mtx->queue = initQueue(61);
-    //queue_init(mtx->q);
 }
 
 // TODO remove comments
@@ -23,7 +22,6 @@ void mutex_lock(struct mutex* mtx)
 		mtx->guard = 0; 
 	}
 	else {
-        //queue_add(mtx->q, gettid());
         enqueue(mtx->queue, getpid());
         setpark();
         mtx->guard = 0;

@@ -7,7 +7,6 @@
 #include "condvar.h"
 
 struct semaphore {
-	/* fill this in! */
 	struct condvar cond;
 	struct mutex mtx; 
 	int counter;

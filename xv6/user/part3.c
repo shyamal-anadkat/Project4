@@ -7,8 +7,8 @@ int status = 0;
 struct spinlock lk;
 void f(void *arg)
 { 
-  // spin_init(&lk);
-  //spin_lock(&lk);
+  spin_init(&lk);
+  spin_lock(&lk);
   //status = *((int*)arg);
 
   if(setpark() < 0)
@@ -28,8 +28,8 @@ void f(void *arg)
   if(unpark(getpid() +1) < 0)
           printf(1, "in thread, unpark failed! pid %d\n", getpid() + 1);
 
+  spin_unlock(&lk);
   exit();
-//  spin_unlock(&lk);
 }
  
 int main()

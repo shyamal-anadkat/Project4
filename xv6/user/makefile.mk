@@ -28,7 +28,7 @@ USER_PROGS := \
 	part3\
 	setparkTest\
 	part4-cv\
-	part4-sem
+	part4-sem\
 	
 
 USER_PROGS := $(addprefix user/, $(USER_PROGS))
