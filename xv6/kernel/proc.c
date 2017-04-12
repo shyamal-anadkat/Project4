@@ -68,8 +68,8 @@ found:
   memset(p->context, 0, sizeof *p->context);
   p->context->eip = (uint)forkret;
 
-  p->isParked = -1;
-  p->setPark = -1;
+  p->isParked = 0;
+  p->setPark = 0;
   p->isThread = 0; 
   p->unparkCalled = 0;
 
@@ -546,92 +546,70 @@ int join(void** ustack) {
 
 void park(void) {
   acquire(&ptable.lock);
-
   if (proc->setPark) {
     // set park called and then unpark
-    //if (proc->unparkCalled == 1) {
-    //  release(&ptable.lock);
-    //  return;
-    //}
-    //else {
-    //  proc->isParked = 1;
-    //  sleep((void*)proc->pid, &ptable.lock);
-    //  proc->unparkCalled = 0;
-    //release(&ptable.lock);
-    //}
-    proc->isParked = 1;
-    proc->setPark = 0; 
-
-    //PUT THREAD TO SLEEP AND SET CHAN TO 0
-    //proc->chan = (void*) proc->pid;
-    //proc->state = SLEEPING;
-    //sched();
-    //proc->chan = 0; 
-    //sleep((void*)proc->pid, &ptable.lock);
-    cprintf("parked\n");
-
-  } else {
-    cprintf("trying to park but not set-parked\n");
-    release(&ptable.lock);
-    return;
+    if (proc->unparkCalled == 1) {
+      release(&ptable.lock);
+      return;
+    }
+    else {
+      proc->isParked = 1;
+      sleep((void*)proc->pid, &ptable.lock);
+      proc->unparkCalled = 0;
+      release(&ptable.lock);
+    }
   }
-  release(&ptable.lock);
-  return;
 }
 
 // indicates a thread is about to park 
 int setpark(void) {
   acquire(&ptable.lock);
-  
-  if(proc->setPark==1 || proc->isParked==1) {
+  if(proc->setPark) {
     release(&ptable.lock);
     return -1; 
   }
 
   proc->setPark = 1; 
- 
   release(&ptable.lock);
   return 0;   //success
 }
 
 // wakes up thread by pid 
 int unpark(int pid) {
-  
   acquire(&ptable.lock);
   struct proc *p;
 
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
     if (p->pid == pid && p->isThread) {
-
-      //p->unparkCalled = 1;
+      p->unparkCalled = 1;
       
-      if(p->setPark == 0 && p->isParked == 0) {
+      if(p->setPark == 0) {
       release(&ptable.lock);  
       return -1;
       }
-
-      p->setPark = 0; //unparked btw setpark and park
-
-      if(p->isParked) {
-      
-      //p->state = RUNNABLE;
-      wakeup((void *) pid);
-      p->isParked = 0;
+      if(p->isParked == 0) {
       release(&ptable.lock);   
-      return 0; //might need to change this
+      return -1; //might need to change this
       }
       
       //wake up
+      p->setPark = 0;
+      p->isParked = 0;
+      
+      //WAKEUP LOGIC (from wakeup1 function call)
+      for(p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
+        if(p->state == SLEEPING && p->pid == pid) {
+          p->state = RUNNABLE;
+        }
+      }
+
       release(&ptable.lock);
-      //wakeup((void *) pid);
-      //p->setPark = 0;
-      //p->isParked = 0;
       return 0;
     }
   }
 
   release(&ptable.lock);
-  return -1; 
+  return 0; 
 }
 
 // Print a process listing to console.  For debugging.
@@ -669,4 +647,3 @@ procdump(void)
     cprintf("\n");
   }
 }
-

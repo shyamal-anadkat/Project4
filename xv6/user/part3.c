@@ -23,7 +23,7 @@ void f(void *arg)
       //int j;
       sleep(1);
       status = tmp +1;
-      printf(1,"status: %d\n", status);
+      //printf(1,"status: %d\n", status);
   }
   if(unpark(getpid() +1) < 0)
           printf(1, "in thread, unpark failed! pid %d\n", getpid() + 1);
