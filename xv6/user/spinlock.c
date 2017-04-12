@@ -10,7 +10,6 @@ void spin_init(struct spinlock* lk)
 
 void spin_lock(struct spinlock *lk)
 {
-	  printf(1, "LOLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL NOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO\n");
 	while(xchg(&lk->flag, 1) != 0);
 }
 
