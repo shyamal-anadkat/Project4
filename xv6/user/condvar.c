@@ -3,31 +3,48 @@
 
 void cv_init(struct condvar* cv)
 {
-	/* fill this in! */
-	cv->queue = initQueue(61);
+	//struct Queue *q = initQueue(61);
+	cv->queue = *(initQueue(61));
 	mutex_init(&cv->mtx);
 }
 
 void cv_wait(struct condvar* cv, struct mutex* mtx)
 {
-	/* fill this in! */
 	// lock cv
 	mutex_lock(&cv->mtx);
 	//add to queue
+	enqueue(&cv->queue, getpid());
 	//setpark
+	setpark();
 	//unlock mtx
+	mutex_unlock(mtx);
 	//unlock cv mtx
+	mutex_unlock(&cv->mtx);
 	//park
+	park();
 	//lock mtx
-
+	mutex_lock(mtx);
 }
 
 void cv_signal(struct condvar* cv)
 {
-	/* fill this in! */
+	mutex_lock(&cv->mtx);
+
+	if (!isEmpty(&cv->queue)) {
+		unpark(dequeue(&cv->queue));
+	}
+
+	mutex_unlock(&cv->mtx);
 }
 
 void cv_broadcast(struct condvar* cv)
 {
-	/* fill this in! */
+	mutex_lock(&cv->mtx);
+	//wakes up all waiting thread
+	while (!isEmpty(&cv->queue)) {
+		//iterate through queue and keep dequeing
+		unpark(dequeue(&cv->queue));
+	}
+
+	mutex_unlock(&cv->mtx);
 }

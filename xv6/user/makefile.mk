@@ -25,7 +25,6 @@ USER_PROGS := \
 	join3\
 	join4\
 	part2\
-	part3\
 	setparkTest\
 	part4-cv\
 	part4-sem\

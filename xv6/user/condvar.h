@@ -5,9 +5,8 @@
 #include "mutex.h"
 
 struct condvar {
-	struct Queue* queue;
+	struct Queue queue;
 	struct mutex mtx;
-
 };
 
 void cv_init(struct condvar* cv);
