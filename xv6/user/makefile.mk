@@ -3,8 +3,6 @@
 USER_PROGS := \
 	cat\
 	echo\
-	forktest\
-	grep\
 	init\
 	kill\
 	ln\
@@ -23,14 +21,16 @@ USER_PROGS := \
 	join\
 	join2\
 	join3\
+	join4\
+	part2\
 	part3\
+	mutexT\
 	setparkTest\
 	part4-cv\
 	part4-sem
-
-	#join4\
-	part2\
 	
+	#forktest\
+	grep\
 
 USER_PROGS := $(addprefix user/, $(USER_PROGS))
 

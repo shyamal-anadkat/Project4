@@ -546,22 +546,21 @@ int join(void** ustack) {
 
 void park(void) {
   acquire(&ptable.lock);
-  if (proc->setPark) {
+  if (proc->setPark == 1 && proc->unparkCalled == 1) {
     // set park called and then unpark
-    if (proc->unparkCalled == 1) {
-      proc->isParked = 0;
-      proc->setPark = 0;
-      proc->unparkCalled = 0;
-      release(&ptable.lock);
-      return;
-    }
-    else {
+    proc->isParked = 0;
+    proc->setPark = 0;
+    proc->unparkCalled = 0;
+    release(&ptable.lock);
+    return;
+  }
+  if (proc->setPark == 1 && proc->unparkCalled == 0) {
       proc->isParked = 1;
       sleep((void*)proc->pid, &ptable.lock);
       release(&ptable.lock);
-    }
+      return;
   }
-  else if (proc->isParked == 0 && proc->setPark == 0 && proc->unparkCalled == 0){
+  if (proc->isParked == 0 && proc->setPark == 0 && proc->unparkCalled == 0){
     proc->isParked = 1;
     sleep((void*)proc->pid, &ptable.lock);
     release(&ptable.lock);
