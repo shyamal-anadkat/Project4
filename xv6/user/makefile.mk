@@ -1,8 +1,6 @@
 
 # user programs
 USER_PROGS := \
-	cat\
-	echo\
 	init\
 	kill\
 	ln\
@@ -15,32 +13,53 @@ USER_PROGS := \
 	wc\
 	zombie\
 	part2\
-	pa
-	mutexT\
-	setparkTest\
 	part4-cv\
 	part4-sem\
-	thread1\
-	thread2\
-	size\
-	threadTest\
-	cond
+	test10\
+	test11\
+	test12\
+	test13\
+	test14\
+	test15\
+	test16\
+	test17\
+	test18\
+	test19\
+	test20\
+	test21\
+	test22
 
+	#test1\
+	test2\
+	test3\
+	test4\
+	test5\
+	test6\
+	test7\
+	test8\
+	test9
 
-	#multi\
-	threadTest\
-	cond3
-	
-	#forktest\
+#Original
+#USER_PROGS := \
+	cat\
+	echo\
+	forktest\
 	grep\
-	clone\
-	clone2\
-	clone3\
-	badclone\
-	join\
-	join2\
-	join3\
-	join4\
+	init\
+	kill\
+	ln\
+	ls\
+	mkdir\
+	rm\
+	sh\
+	stressfs\
+	tester\
+	usertests\
+	wc\
+	zombie
+
+#Tests excluded:
+
 
 USER_PROGS := $(addprefix user/, $(USER_PROGS))
 
