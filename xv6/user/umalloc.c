@@ -18,15 +18,21 @@ union header {
 
 typedef union header Header;
 
+static struct spinlock mlock;
+static struct spinlock flock;
+
+
 static Header base;
 static Header *freep;
 
 void
 free(void *ap)
 {
+  spin_init(&flock);
   Header *bp, *p;
 
   bp = (Header*)ap - 1;
+  spin_lock(&flock);
   for(p = freep; !(bp > p && bp < p->s.ptr); p = p->s.ptr)
     if(p >= p->s.ptr && (bp > p || bp < p->s.ptr))
       break;
@@ -41,6 +47,8 @@ free(void *ap)
   } else
     p->s.ptr = bp;
   freep = p;
+
+  spin_unlock(&flock);
 }
 
 static Header*
@@ -63,9 +71,13 @@ morecore(uint nu)
 void*
 malloc(uint nbytes)
 {
+
+  spin_init(&mlock);
+
   Header *p, *prevp;
   uint nunits;
 
+  spin_lock(&mlock);
   nunits = (nbytes + sizeof(Header) - 1)/sizeof(Header) + 1;
   if((prevp = freep) == 0){
     base.s.ptr = freep = prevp = &base;
@@ -81,6 +93,7 @@ malloc(uint nbytes)
         p->s.size = nunits;
       }
       freep = prevp;
+      spin_unlock(&mlock);
       return (void*)(p + 1);
     }
     if(p == freep)
