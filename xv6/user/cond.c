@@ -1,4 +1,4 @@
-/* test cv_wait and cv_signal, signal, don't broadcast */
+/* test cv_wait and cv_signal, cannot leave cv_wait without lock */
 #include "types.h"
 #include "user.h"
 
@@ -11,7 +11,6 @@ int ppid;
 int global = 0;
 struct mutex lock;
 struct condvar cond;
-int nthreads = 30;
 
 #define assert(x) if (x) {} else { \
    printf(1, "%s: %d ", __FILE__, __LINE__); \
@@ -30,28 +29,20 @@ main(int argc, char *argv[])
 
    mutex_init(&lock);
 
-   int i;
-   for(i = 0; i < nthreads; i++) {
-     int thread_pid = thread_create(worker, 0);
-     assert(thread_pid > 0);
-   }
 
+   int thread_pid = thread_create(worker, 0);
+   assert(thread_pid > 0);
+
+   sleep(20);
+   mutex_lock(&lock);
+   global = 2;
+   cv_signal(&cond);
    sleep(50);
+   global = 1;
+   mutex_unlock(&lock);
 
-   for(i = 0; i < nthreads; i++) {
-     mutex_lock(&lock);
-     assert(global == i);
-     cv_signal(&cond);
-     mutex_unlock(&lock);
-
-     int join_pid = thread_join();
-     assert(join_pid > 0);
-
-     sleep(10);
-     mutex_lock(&lock);
-     assert(global == i+1);
-     mutex_unlock(&lock);
-   }
+   int join_pid = thread_join();
+   assert(join_pid == thread_pid);
 
    printf(1, "TEST PASSED\n");
    exit();
@@ -60,8 +51,9 @@ main(int argc, char *argv[])
 void
 worker(void *arg_ptr) {
   mutex_lock(&lock);
+  assert(global == 0);
   cv_wait(&cond, &lock);
-  global++;
+  assert(global == 1);
   mutex_unlock(&lock);
   exit();
 }

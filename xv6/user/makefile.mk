@@ -14,6 +14,25 @@ USER_PROGS := \
 	tester\
 	wc\
 	zombie\
+	part2\
+	part3\
+	mutexT\
+	setparkTest\
+	part4-cv\
+	part4-sem\
+	thread1\
+	thread2\
+	size\
+	threadTest\
+	cond
+
+
+	#multi\
+	threadTest\
+	cond3
+	
+	#forktest\
+	grep\
 	clone\
 	clone2\
 	clone3\
@@ -22,15 +41,6 @@ USER_PROGS := \
 	join2\
 	join3\
 	join4\
-	part2\
-	part3\
-	mutexT\
-	setparkTest\
-	part4-cv\
-	part4-sem
-	
-	#forktest\
-	grep\
 
 USER_PROGS := $(addprefix user/, $(USER_PROGS))
 

@@ -10,7 +10,7 @@
 int ppid;
 int global = 0;
 unsigned int size = 0;
-lock_t lock, lock2;
+struct mutex mutex, mutex2;
 int num_threads = 30;
 
 
@@ -32,10 +32,10 @@ main(int argc, char *argv[])
    int arg = 101;
    void *arg_ptr = &arg;
 
-   lock_init(&lock);
-   lock_init(&lock2);
-   lock_acquire(&lock);
-   lock_acquire(&lock2);
+   mutex_init(&mutex);
+   mutex_init(&mutex2);
+   mutex_lock(&mutex);
+   mutex_lock(&mutex2);
 
    int i;
    for (i = 0; i < num_threads; i++) {
@@ -46,22 +46,22 @@ main(int argc, char *argv[])
    size = (unsigned int)sbrk(0);
 
    while (global < num_threads) {
-      lock_release(&lock);
+      mutex_unlock(&mutex);
       sleep(100);
-      lock_acquire(&lock);
+      mutex_lock(&mutex);
    }
 
    global = 0;
    sbrk(10000);
    size = (unsigned int)sbrk(0);
-   lock_release(&lock);
+   mutex_unlock(&mutex);
 
    while (global < num_threads) {
-      lock_release(&lock2);
+      mutex_unlock(&mutex2);
       sleep(100);
-      lock_acquire(&lock2);
+      mutex_lock(&mutex2);
    }
-   lock_release(&lock2);
+   mutex_unlock(&mutex2);
 
 
    for (i = 0; i < num_threads; i++) {
@@ -75,15 +75,15 @@ main(int argc, char *argv[])
 
 void
 worker(void *arg_ptr) {
-   lock_acquire(&lock);
+   mutex_lock(&mutex);
    assert((unsigned int)sbrk(0) == size);
    global++;
-   lock_release(&lock);
+   mutex_unlock(&mutex);
 
-   lock_acquire(&lock2);
+   mutex_lock(&mutex2);
    assert((unsigned int)sbrk(0) == size);
    global++;
-   lock_release(&lock2);
+   mutex_unlock(&mutex2);
 
    exit();
 }
