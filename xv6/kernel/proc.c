@@ -549,29 +549,44 @@ void park(void) {
   if (proc->setPark) {
     // set park called and then unpark
     if (proc->unparkCalled == 1) {
+      proc->isParked = 0;
+      proc->setPark = 0;
+      proc->unparkCalled = 0;
       release(&ptable.lock);
       return;
     }
     else {
       proc->isParked = 1;
       sleep((void*)proc->pid, &ptable.lock);
-      proc->unparkCalled = 0;
       release(&ptable.lock);
     }
+  }
+  else if (proc->isParked == 0 && proc->setPark == 0 && proc->unparkCalled == 0){
+    proc->isParked = 1;
+    sleep((void*)proc->pid, &ptable.lock);
+    release(&ptable.lock);
   }
 }
 
 // indicates a thread is about to park 
 int setpark(void) {
   acquire(&ptable.lock);
-  if(proc->setPark) {
+  if(proc->setPark == 1) {
     release(&ptable.lock);
     return -1; 
   }
+  if (proc->unparkCalled == 1) {
+    release(&ptable.lock);  
+    return -1;
+  }
 
-  proc->setPark = 1; 
-  release(&ptable.lock);
-  return 0;   //success
+  if (proc->isParked == 0) {
+    proc->setPark = 1; 
+    release(&ptable.lock);
+    return 0;   //success
+  }
+
+  return 0;
 }
 
 // wakes up thread by pid 
@@ -581,30 +596,33 @@ int unpark(int pid) {
 
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
     if (p->pid == pid && p->isThread) {
-      p->unparkCalled = 1;
-      
-      if(p->setPark == 0) {
-      release(&ptable.lock);  
-      return -1;
+      if(p->setPark == 0 && p->isParked == 0) {
+        release(&ptable.lock);  
+        return -1;
       }
-      if(p->isParked == 0) {
-      release(&ptable.lock);   
-      return -1; //might need to change this
+      if (p->setPark == 1 && p->unparkCalled == 1) {
+        release(&ptable.lock);  
+        return -1;
+      }
+      if(p->setPark == 1 && p->isParked == 0) {
+        p->unparkCalled = 1;
       }
       
-      //wake up
-      p->setPark = 0;
-      p->isParked = 0;
-      
-      //WAKEUP LOGIC (from wakeup1 function call)
-      for(p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
-        if(p->state == SLEEPING && p->pid == pid) {
-          p->state = RUNNABLE;
+      if (p->isParked == 1) {
+        //wake up
+        p->setPark = 0;
+        p->isParked = 0;
+        
+        //WAKEUP LOGIC (from wakeup1 function call)
+        for(p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
+          if(p->state == SLEEPING && p->pid == pid) {
+            p->state = RUNNABLE;
+          }
         }
-      }
 
-      release(&ptable.lock);
-      return 0;
+        release(&ptable.lock);
+        return 0;
+      }
     }
   }
 
