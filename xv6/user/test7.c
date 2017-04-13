@@ -33,6 +33,6 @@ main(int argc, char *argv[])
    int join_pid = join(&join_stack);
    assert(join_pid == -1);
 
-   printf(1, "TEST PASSED\n");
+   printf(1, "join 3 TEST PASSED\n");
    exit();
 }

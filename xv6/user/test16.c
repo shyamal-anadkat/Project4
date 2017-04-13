@@ -1,4 +1,4 @@
-/* thread user library functions */
+/* test cv_wait and cv_signal, cannot leave cv_wait without lock */
 #include "types.h"
 #include "user.h"
 
@@ -8,7 +8,9 @@
 #define PGSIZE (4096)
 
 int ppid;
-int global = 1;
+int global = 0;
+struct mutex lock;
+struct condvar cond;
 
 #define assert(x) if (x) {} else { \
    printf(1, "%s: %d ", __FILE__, __LINE__); \
@@ -25,23 +27,33 @@ main(int argc, char *argv[])
 {
    ppid = getpid();
 
-   int arg = 35;
-   int thread_pid = thread_create(worker, &arg);
+   mutex_init(&lock);
+
+
+   int thread_pid = thread_create(worker, 0);
    assert(thread_pid > 0);
+
+   sleep(20);
+   mutex_lock(&lock);
+   global = 2;
+   cv_signal(&cond);
+   sleep(50);
+   global = 1;
+   mutex_unlock(&lock);
 
    int join_pid = thread_join();
    assert(join_pid == thread_pid);
-   assert(global == 2);
 
-   printf(1, "TEST PASSED\n");
+   printf(1, "cond 1 TEST PASSED\n");
    exit();
 }
 
 void
 worker(void *arg_ptr) {
-   int arg = *(int*)arg_ptr;
-   assert(arg == 35);
-   assert(global == 1);
-   global++;
-   exit();
+  mutex_lock(&lock);
+  assert(global == 0);
+  cv_wait(&cond, &lock);
+  assert(global == 1);
+  mutex_unlock(&lock);
+  exit();
 }

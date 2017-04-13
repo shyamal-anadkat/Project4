@@ -1,14 +1,14 @@
-/* clone and verify that address space is shared */
+/* join, not wait, should handle threads */
 #include "types.h"
 #include "user.h"
 
 #undef NULL
 #define NULL ((void*)0)
 
-int ppid;
 #define PGSIZE (4096)
 
-volatile int global = 1;
+int ppid;
+int global = 1;
 
 #define assert(x) if (x) {} else { \
    printf(1, "%s: %d ", __FILE__, __LINE__); \
@@ -24,22 +24,35 @@ int
 main(int argc, char *argv[])
 {
    ppid = getpid();
+
    void *stack = malloc(PGSIZE*2);
    assert(stack != NULL);
    if((uint)stack % PGSIZE)
      stack = stack + (4096 - (uint)stack % PGSIZE);
 
-   int clone_pid = clone(worker, 0, stack);
-   //printf(1, "%d", clone_pid);
+   int arg = 42;
+   int clone_pid = clone(worker, &arg, stack);
    assert(clone_pid > 0);
-   while(global != 5);
-   printf(1, "TEST PASSED\n");
+
+   sleep(250);
+   assert(wait() == -1);
+
+   void *join_stack;
+   int join_pid = join(&join_stack);
+   assert(join_pid == clone_pid);
+   assert(stack == join_stack);
+   assert(global == 2);
+
+   printf(1, "join 4 TEST PASSED\n");
    exit();
 }
 
 void
 worker(void *arg_ptr) {
+   int arg = *(int*)arg_ptr;
+   assert(arg == 42);
    assert(global == 1);
-   global = 5;
+   global++;
    exit();
 }
+

@@ -1,4 +1,4 @@
-/* join argument checking */
+/* clone and join syscalls */
 #include "types.h"
 #include "user.h"
 
@@ -34,14 +34,15 @@ main(int argc, char *argv[])
    int clone_pid = clone(worker, &arg, stack);
    assert(clone_pid > 0);
 
-   sbrk(PGSIZE);
-   void **join_stack = (void**) ((uint)sbrk(0) - 4);
-   assert(join((void**)((uint)join_stack + 2)) == -1);
-   assert(join(join_stack) == clone_pid);
-   assert(stack == *join_stack);
+   void *join_stack;
+   int join_pid = join(&join_stack);
+   assert(join_pid == clone_pid);
+   printf(1, "%p\n", stack);
+   printf(1, "%p\n", join_stack);
+   assert(stack == join_stack);
    assert(global == 2);
 
-   printf(1, "TEST PASSED\n");
+   printf(1, "join 1 TEST PASSED\n");
    exit();
 }
 

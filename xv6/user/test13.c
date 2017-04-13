@@ -1,4 +1,4 @@
-/* memory leaks from thread library? */
+/* thread user library functions */
 #include "types.h"
 #include "user.h"
 
@@ -8,7 +8,7 @@
 #define PGSIZE (4096)
 
 int ppid;
-volatile int global;
+int global = 1;
 
 #define assert(x) if (x) {} else { \
    printf(1, "%s: %d ", __FILE__, __LINE__); \
@@ -25,24 +25,23 @@ main(int argc, char *argv[])
 {
    ppid = getpid();
 
-   int i, thread_pid, join_pid;
-   for(i = 0; i < 2000; i++) {
-      global = 1;
-      thread_pid = thread_create(worker, 0);
-      assert(thread_pid > 0);
-      join_pid = thread_join();
-      assert(join_pid == thread_pid);
-      assert(global == 5);
-      assert((uint)sbrk(0) < (150 * 4096) && "shouldn't even come close");
-   }
+   int arg = 35;
+   int thread_pid = thread_create(worker, &arg);
+   assert(thread_pid > 0);
 
-   printf(1, "TEST PASSED\n");
+   int join_pid = thread_join();
+   assert(join_pid == thread_pid);
+   assert(global == 2);
+
+   printf(1, "thread 1 TEST PASSED\n");
    exit();
 }
 
 void
 worker(void *arg_ptr) {
+   int arg = *(int*)arg_ptr;
+   assert(arg == 35);
    assert(global == 1);
-   global+=4;
+   global++;
    exit();
 }

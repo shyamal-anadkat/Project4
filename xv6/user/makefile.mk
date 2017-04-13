@@ -15,7 +15,7 @@ USER_PROGS := \
 	wc\
 	zombie\
 	part2\
-	part3\
+	pa
 	mutexT\
 	setparkTest\
 	part4-cv\

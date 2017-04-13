@@ -69,7 +69,7 @@ main(int argc, char *argv[])
       assert(join_pid > 0);
    }
 
-   printf(1, "TEST PASSED\n");
+   printf(1, "size TEST PASSED\n");
    exit();
 }
 

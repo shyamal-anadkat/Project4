@@ -1,6 +1,8 @@
-/* join, not wait, should handle threads */
+/* clone copies file descriptors, but doesn't share */
 #include "types.h"
 #include "user.h"
+#include "fcntl.h"
+#include "x86.h"
 
 #undef NULL
 #define NULL ((void*)0)
@@ -8,7 +10,7 @@
 #define PGSIZE (4096)
 
 int ppid;
-int global = 1;
+volatile uint newfd = 0;
 
 #define assert(x) if (x) {} else { \
    printf(1, "%s: %d ", __FILE__, __LINE__); \
@@ -24,35 +26,24 @@ int
 main(int argc, char *argv[])
 {
    ppid = getpid();
-
    void *stack = malloc(PGSIZE*2);
    assert(stack != NULL);
    if((uint)stack % PGSIZE)
      stack = stack + (4096 - (uint)stack % PGSIZE);
 
-   int arg = 42;
-   int clone_pid = clone(worker, &arg, stack);
+   int fd = open("tmp", O_WRONLY|O_CREATE);
+   assert(fd == 3);
+   int clone_pid = clone(worker, 0, stack);
    assert(clone_pid > 0);
-
-   sleep(250);
-   assert(wait() == -1);
-
-   void *join_stack;
-   int join_pid = join(&join_stack);
-   assert(join_pid == clone_pid);
-   assert(stack == join_stack);
-   assert(global == 2);
-
-   printf(1, "TEST PASSED\n");
+   while(!newfd);
+   assert(write(newfd, "goodbye\n", 8) == -1);
+   printf(1, "clone 3 TEST PASSED\n");
    exit();
 }
 
 void
 worker(void *arg_ptr) {
-   int arg = *(int*)arg_ptr;
-   assert(arg == 42);
-   assert(global == 1);
-   global++;
+   assert(write(3, "hello\n", 6) == 6);
+   xchg(&newfd, open("tmp2", O_WRONLY|O_CREATE));
    exit();
 }
-

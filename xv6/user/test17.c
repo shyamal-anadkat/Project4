@@ -53,7 +53,7 @@ main(int argc, char *argv[])
      mutex_unlock(&lock);
    }
 
-   printf(1, "TEST PASSED\n");
+   printf(1, "cond 2 TEST PASSED\n");
    exit();
 }
 

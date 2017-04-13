@@ -39,7 +39,7 @@ main(int argc, char *argv[])
 
    assert(clone(worker, 0, stack) == -1);
 
-   printf(1, "TEST PASSED\n");
+   printf(1, "clone 4 TEST PASSED\n");
    exit();
 }
 

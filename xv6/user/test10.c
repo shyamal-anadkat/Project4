@@ -61,7 +61,7 @@ int main()
   //thread_create(&f,arg);
   //thread_join();
  
-  printf(1, "status = %d\n", status);
+  printf(1, "mutexTest: status = %d\n", status);
 
   exit();
 }

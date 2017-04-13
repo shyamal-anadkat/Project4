@@ -1,8 +1,6 @@
-/* clone copies file descriptors, but doesn't share */
+/* clone and play with the argument */
 #include "types.h"
 #include "user.h"
-#include "fcntl.h"
-#include "x86.h"
 
 #undef NULL
 #define NULL ((void*)0)
@@ -10,7 +8,8 @@
 #define PGSIZE (4096)
 
 int ppid;
-volatile uint newfd = 0;
+volatile int arg = 55;
+volatile int global = 1;
 
 #define assert(x) if (x) {} else { \
    printf(1, "%s: %d ", __FILE__, __LINE__); \
@@ -31,19 +30,25 @@ main(int argc, char *argv[])
    if((uint)stack % PGSIZE)
      stack = stack + (4096 - (uint)stack % PGSIZE);
 
-   int fd = open("tmp", O_WRONLY|O_CREATE);
-   assert(fd == 3);
-   int clone_pid = clone(worker, 0, stack);
+   int clone_pid = clone(worker, (void*)&arg, stack);
+   //int clone_pid2 = clone(worker, (void*)&arg, stack);
+
+   //printf(1, "TID: %d\n", clone_pid);
+   //printf(1, "TID2: %d\n", clone_pid2);
+   //printf(1,"PPID: %d\n", ppid);
+   
    assert(clone_pid > 0);
-   while(!newfd);
-   assert(write(newfd, "goodbye\n", 8) == -1);
-   printf(1, "TEST PASSED\n");
+   while(global != 55);
+   assert(arg == 1);
+   printf(1, "clone 2 TEST PASSED\n");
    exit();
 }
 
 void
 worker(void *arg_ptr) {
-   assert(write(3, "hello\n", 6) == 6);
-   xchg(&newfd, open("tmp2", O_WRONLY|O_CREATE));
+   int tmp = *(int*)arg_ptr;
+   *(int*)arg_ptr = 1;
+   assert(global == 1);
+   global = tmp;
    exit();
 }

@@ -47,7 +47,7 @@ int main()
 	thread_join();
 	printf(1, "Thread1 exited w/ pid %d\n", pid);
 	printf(1, "Thread2 exited w/ pid %d\n", pid2);
-
+	printf(1, "ThreadTest Done\n");
 	exit();
 }
 
