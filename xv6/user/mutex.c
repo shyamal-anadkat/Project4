@@ -1,8 +1,6 @@
 #include "types.h"
 #include "user.h"
 #include "x86.h"
-#include "mutex.h"
-#include "queue.h"
 
 void mutex_init(struct mutex* mtx)
 {

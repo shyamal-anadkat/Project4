@@ -74,11 +74,11 @@ struct proc {
   struct file *ofile[NOFILE];  // Open files
   struct inode *cwd;           // Current directory
   char name[16];               // Process name (debugging)
-  void* stack;                 //keep track of user stack for p4
-  int isThread;                //is thread boolean
-  int setPark;                 //if setparked 
-  int isParked;                //if parked 
-  int unparkCalled;            //for unpark called state
+  void* stack;                 // keep track of user stack for p4
+  int isThread;                // is thread boolean
+  int setPark;                 // if setparked 
+  int isParked;                // if parked 
+  int unparkCalled;            // for unpark called state
 };
 
 // Process memory is laid out contiguously, low addresses first:

@@ -125,9 +125,7 @@ growproc(int n)
 
   // to support part 2 : Zev's ambitions
   // update thread size (with sane addr space)
-  // KIND OF WORKS ??
   // MAKE IT ATOMIC
-
   struct proc *p;
   acquire(&ptable.lock);  //atomic 
 
@@ -447,7 +445,6 @@ start the new thread with a call to the function fn,
 passing the provided argument arg
 */
 int clone(void (*fn)(void*), void* arg, void* ustack) {
-
   int i;
   int pid;
   struct proc* np;
@@ -543,6 +540,7 @@ int join(void** ustack) {
 // some tight logic for park 
 void park(void) {
   acquire(&ptable.lock);
+  // currently parked
   if (proc->setPark == 1 && proc->unparkCalled == 1) {
     // set park called and then unpark
     proc->isParked = 0;
@@ -551,12 +549,14 @@ void park(void) {
     release(&ptable.lock);
     return;
   }
+  // currently setparked
   if (proc->setPark == 1 && proc->unparkCalled == 0) {
       proc->isParked = 1;
       sleep((void*)proc->pid, &ptable.lock);
       release(&ptable.lock);
       return;
   }
+  // currently neither parked nor setparked, running
   if (proc->isParked == 0 && proc->setPark == 0 && proc->unparkCalled == 0){
     proc->isParked = 1;
     sleep((void*)proc->pid, &ptable.lock);
@@ -567,15 +567,17 @@ void park(void) {
 // indicates a thread is about to park 
 int setpark(void) {
   acquire(&ptable.lock);
+  // currently setparked
   if(proc->setPark == 1) {
     release(&ptable.lock);
     return -1; 
   }
-  if (proc->unparkCalled == 1) {
+  // currently in NP state (unpark called on setparked)
+  if (proc->unparkCalled == 1) {  // NP state represented by unparkCalled == 1
     release(&ptable.lock);  
     return -1;
   }
-
+  // currently parked
   if (proc->isParked == 0) {
     proc->setPark = 1; 
     release(&ptable.lock);
@@ -585,27 +587,30 @@ int setpark(void) {
   return 0;
 }
 
-// wakes up thread by pid (+ tigher logic)
+// wakes up thread by pid (+ tighter logic)
 int unpark(int pid) {
   acquire(&ptable.lock);
   struct proc *p;
 
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
     if (p->pid == pid && p->isThread) {
+      // running state
       if(p->setPark == 0 && p->isParked == 0) {
         release(&ptable.lock);  
         return -1;
       }
+      // NP state
       if (p->setPark == 1 && p->unparkCalled == 1) {
         release(&ptable.lock);  
         return -1;
       }
+      // currently setparked
       if(p->setPark == 1 && p->isParked == 0) {
         p->unparkCalled = 1;
       }
       
+      // currently parked
       if (p->isParked == 1) {
-      	
         //wake up
         p->setPark = 0;
         p->isParked = 0;
@@ -621,6 +626,7 @@ int unpark(int pid) {
         return 0;
       }
     }
+
   }
 
   release(&ptable.lock);

@@ -9,10 +9,29 @@
  * Should exit cleanly with no output.
  */
 
+static int numthreads;
+static int* pids = NULL;
+
 struct node {
 	int value;
 	struct node* next;
 };
+
+static void bail(void)
+{
+	int i, count = 0;
+
+	for (i = 0; i < numthreads; i++) {
+		if (pids[i] != -1) {
+			thread_join();
+			count += 1;
+		}
+	}
+
+	printf(1, "[cleaned up %d threads before exiting]\n", count);
+
+	exit();
+}
 
 static struct node* new_node(int val)
 {
@@ -49,9 +68,8 @@ static void threadfunc(void* arg)
 int
 main(int argc, char *argv[])
 {
-	int i, j, pid, numthreads, count;
+	int i, j, pid, count;
 	int sum, numnodes;
-	int* pids;
 	struct node* n;
 	struct node* tmp;
 
@@ -69,33 +87,38 @@ main(int argc, char *argv[])
 		exit();
 	}
 
+	for (i = 0; i < numthreads; i++)
+		pids[i] = -1;
+
 	spin_init(&lock);
 
 	for (i = 0; i < numthreads; i++) {
 		pids[i] = thread_create(threadfunc, (void*)count);
 		if (pids[i] < 1) {
-			
-			for (i = 0; i < numthreads; i++) {
-			pid = thread_join();
-		   }
-		   
 			printf(1, "oops, thread_create() failed\n");
-			exit();
+			bail();
 		}
 	}
 
 	for (i = 0; i < numthreads; i++) {
 		pid = thread_join();
+		if (pid < 0) {
+			printf(1, "oops, thread_join() returned -1 unexpectedly\n");
+			bail();
+		}
 		for (j = 0; j < numthreads; j++) {
-			if (pids[j] == pid)
+			if (pids[j] == pid) {
+				pids[j] = -1;
 				break;
+			}
 		}
 		if (j == numthreads) {
-
 			printf(1, "oops, thread_join() returned unexpected pid\n");
-			exit();
+			bail();
 		}
 	}
+
+	free(pids);
 
 	numnodes = sum = 0;
 	for (n = head; n; n = tmp) {
