@@ -1,6 +1,8 @@
 #include "types.h"
 #include "user.h"
 
+//****Implement semaphore using condition variables*****//
+
 void sem_init(struct semaphore* sem, int initval)
 {
 	mutex_init(&sem->mtx);            //lock init
@@ -13,14 +15,14 @@ void sem_init(struct semaphore* sem, int initval)
 
 void sem_wait(struct semaphore* sem)
 {
-	mutex_lock(&sem->mtx);
+	mutex_lock(&sem->mtx);	//make atomic
 
 	while(sem->counter == 0) {
 		cv_wait(&sem->cond, &sem->mtx);
 	}
 	sem->counter--;
 
-	mutex_unlock(&sem->mtx);
+	mutex_unlock(&sem->mtx); //release mutex lock
 }
 
 //increment the value of semaphore s by one
@@ -28,7 +30,7 @@ void sem_wait(struct semaphore* sem)
 
 void sem_post(struct semaphore* sem)
 {
-		mutex_lock(&sem->mtx);
+		mutex_lock(&sem->mtx); //make atomic
 		
 		//increment sem value
 		sem->counter++;    
@@ -36,5 +38,5 @@ void sem_post(struct semaphore* sem)
 		//wake one up 
 		cv_broadcast(&sem->cond);
 
-	    mutex_unlock(&sem->mtx);
+	    mutex_unlock(&sem->mtx); //release mutex lock
 }

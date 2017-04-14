@@ -8,10 +8,9 @@ void mutex_init(struct mutex* mtx)
 {
 	mtx->flag  = 0;
 	mtx->guard = 0;
-    mtx->queue = initQueue(61);
+    mtx->queue = initQueue(1000);
 }
 
-// TODO remove comments
 void mutex_lock(struct mutex* mtx)
 {
     // acquire guard lock by spinning
@@ -33,6 +32,7 @@ void mutex_unlock(struct mutex* mtx)
 {
 	//acquire guard lock by spinning
     while (xchg((volatile uint*)&mtx->guard, 1) != 0);
+
     if (isEmpty(mtx->queue)) {
         mtx->flag = 0; // let go of lock; no one wants it
     }

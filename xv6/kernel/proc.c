@@ -128,20 +128,21 @@ growproc(int n)
   // KIND OF WORKS ??
   // MAKE IT ATOMIC
 
-  acquire(&ptable.lock);
-
   struct proc *p;
-  if (proc->isThread) {
+  acquire(&ptable.lock);  //atomic 
+
+  if (proc->isThread==1) {
     for (p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
-      if (p->pgdir == proc->pgdir && p->parent == proc->parent  && p->isThread)
-        p->sz = proc->sz;
-    }
-    proc->parent->sz = proc->sz; 
+      //update size if p's parent is same as proc's parents
+      if (p->parent == proc->parent  && p->isThread==1)
+        p->sz = sz;
+     }
+    proc->parent->sz = sz; 
   }
   else { 
-  for (p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
-    if (p->pgdir == proc->pgdir && p->parent == proc && p->isThread)
-      p->sz = proc->sz;
+   for (p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
+      if (p->parent == proc && p->isThread==1)
+           p->sz = sz;
     }
   }
 
@@ -497,8 +498,8 @@ int clone(void (*fn)(void*), void* arg, void* ustack) {
   np->cwd = idup(proc->cwd);
 
   np->tf->eax = 0;
-  pid = np->pid;
-  np->state = RUNNABLE;
+  pid = np->pid;		//pid to be returned
+  np->state = RUNNABLE; //change state to runnable 
   safestrcpy(np->name, proc->name, sizeof(proc->name));
   return pid;
 }
@@ -515,20 +516,21 @@ int join(void** ustack) {
     
     //looking for zombie children
      for (p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
-      if (p->parent != proc || p->pgdir != proc->pgdir || proc->pid == p->pid)
+      if (p->parent != proc || !p->isThread)
         continue;
+
       havekids = 1;
+
       if(p->state == ZOMBIE){
         pid = p->pid;
-        //kfree(p->kstack); // ?? SHOULD WE KFREE here, salil ?
-        //p->kstack = 0;
+        kfree(p->kstack); // ?? SHOULD WE KFREE here, salil ?
+        p->kstack = 0;
         *ustack = (void *)p->stack;
         p->state = UNUSED;
         p->pid = 0;
         p->parent = 0;
         p->name[0] = 0;
         p->killed = 0;
-        //p->isThread = 0;
         release(&ptable.lock);
         return pid;
       }
@@ -544,6 +546,7 @@ int join(void** ustack) {
   }
 }
 
+// some tight logic for park 
 void park(void) {
   acquire(&ptable.lock);
   if (proc->setPark == 1 && proc->unparkCalled == 1) {
@@ -588,7 +591,7 @@ int setpark(void) {
   return 0;
 }
 
-// wakes up thread by pid 
+// wakes up thread by pid (+ tigher logic)
 int unpark(int pid) {
   acquire(&ptable.lock);
   struct proc *p;
@@ -608,6 +611,7 @@ int unpark(int pid) {
       }
       
       if (p->isParked == 1) {
+      	
         //wake up
         p->setPark = 0;
         p->isParked = 0;
