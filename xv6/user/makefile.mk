@@ -1,56 +1,6 @@
 
 # user programs
 USER_PROGS := \
-	init\
-	kill\
-	ln\
-	ls\
-	mkdir\
-	rm\
-	sh\
-	stressfs\
-	tester\
-	wc\
-	zombie\
-	part2\
-	part4-cv\
-	part4-sem\
-	test11\
-	test12\
-	test13\
-	test14\
-	test15\
-	test16\
-	test17\
-	test18\
-	test19\
-	test20\
-	test21\
-
-	#test1\
-	test2\
-	test3\
-	test4\
-	test5\
-	test6\
-	test7\
-	test8\
-	test9\
-	test10\
-	test11\
-	test12\
-	test13\
-	test14\
-	test15\
-	test16\
-	test17\
-	test18\
-	test19\
-	test20\
-	test21\
-
-#Original
-#USER_PROGS := \
 	cat\
 	echo\
 	forktest\
@@ -66,10 +16,10 @@ USER_PROGS := \
 	tester\
 	usertests\
 	wc\
-	zombie
-
-#Tests excluded:
-
+	zombie\
+	part2\
+	part4-cv\
+	part4-sem
 
 USER_PROGS := $(addprefix user/, $(USER_PROGS))
 
