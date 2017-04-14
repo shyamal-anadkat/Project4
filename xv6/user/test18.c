@@ -1,4 +1,3 @@
-/* no exit call in thread, should trap at bogus address */
 #include "types.h"
 #include "user.h"
 

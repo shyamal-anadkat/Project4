@@ -74,6 +74,11 @@ main(int argc, char *argv[])
 	for (i = 0; i < numthreads; i++) {
 		pids[i] = thread_create(threadfunc, (void*)count);
 		if (pids[i] < 1) {
+			
+			for (i = 0; i < numthreads; i++) {
+			pid = thread_join();
+		   }
+		   
 			printf(1, "oops, thread_create() failed\n");
 			exit();
 		}
@@ -86,6 +91,7 @@ main(int argc, char *argv[])
 				break;
 		}
 		if (j == numthreads) {
+
 			printf(1, "oops, thread_join() returned unexpected pid\n");
 			exit();
 		}
