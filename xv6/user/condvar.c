@@ -3,8 +3,7 @@
 
 void cv_init(struct condvar* cv)
 {
-	//struct Queue *q = initQueue(61);
-	cv->queue = *(initQueue(61));
+	cv->queue = *(initQueue(65));
 	mutex_init(&cv->mtx);
 }
 

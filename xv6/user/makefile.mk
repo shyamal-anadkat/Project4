@@ -24,7 +24,6 @@ USER_PROGS := \
 	test19\
 	test20\
 	test21\
-	test22
 	
 
 	#test1\
@@ -48,7 +47,6 @@ USER_PROGS := \
 	test19\
 	test20\
 	test21\
-	test22
 
 #Original
 #USER_PROGS := \

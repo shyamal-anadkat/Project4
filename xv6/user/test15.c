@@ -1,53 +1,62 @@
+/* test lock correctness */
 #include "types.h"
-#include "stat.h"
 #include "user.h"
-#include "threads.h"
 
-void test(void *arg)
-{
-	int i;
-	for (i = 0; i < 299999999; i++)
-		;
+#undef NULL
+#define NULL ((void*)0)
 
-	int x = 5;
-	printf(1, "x at %p\n", &x);
-	printf(1, "thread with pid: %d\n", getpid());
-	exit();
+#define PGSIZE (4096)
+
+int ppid;
+int global = 0;
+struct mutex lock;
+int num_threads = 30;
+int loops = 1000;
+
+
+#define assert(x) if (x) {} else { \
+   printf(1, "%s: %d ", __FILE__, __LINE__); \
+   printf(1, "assert failed (%s)\n", # x); \
+   printf(1, "locks.c TEST FAILED\n"); \
+   kill(ppid); \
+   exit(); \
 }
 
-void snooze(void *argSnooze)
+void worker(void *arg_ptr);
+
+int
+main(int argc, char *argv[])
 {
-	printf(1, "ZzzzZzzzZzzz .... %d\n", getpid());
-	setpark();
-	park();
-	printf(1, "I'm awake, I'm awake!\n");
-	exit();
+   ppid = getpid();
+
+   mutex_init(&lock);
+
+   int i;
+   for (i = 0; i < num_threads; i++) {
+      int thread_pid = thread_create(worker, 0);
+      assert(thread_pid > 0);
+   }
+
+   for (i = 0; i < num_threads; i++) {
+      int join_pid = thread_join();
+      assert(join_pid > 0);
+   }
+
+   assert(global == num_threads * loops);
+
+   printf(1, "locks TEST PASSED\n");
+   exit();
 }
 
-void alarm(void *argAlarm)
-{
-	int i;
-	printf(1, "Spinning.... %d\n", getpid());
-	for (i = 0; i < 9999999; i++)
-		;
-	unpark(4);
-	for (i = 0; i < 9999999; i++)
-		;
-	printf(1, "Done spinning.... %d\n", getpid());
-	exit();
+void
+worker(void *arg_ptr) {
+   int i, j, tmp;
+   for (i = 0; i < loops; i++) {
+      mutex_lock(&lock);
+      tmp = global;
+      for(j = 0; j < 50; j++); // take some time
+      global = tmp + 1;
+      mutex_unlock(&lock);
+   }
+   exit();
 }
-
-int main() 
-{
-	int x = 10;
-	printf(1, "Main x at %p\n", &x);
-	int pid = thread_create(snooze, (void*)x);
-	int pid2 = thread_create(alarm, (void*)x);
-	thread_join();
-	thread_join();
-	printf(1, "Thread1 exited w/ pid %d\n", pid);
-	printf(1, "Thread2 exited w/ pid %d\n", pid2);
-	printf(1, "ThreadTest Done\n");
-	exit();
-}
-

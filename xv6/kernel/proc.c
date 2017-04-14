@@ -511,6 +511,7 @@ int join(void** ustack) {
   int havekids, pid;
   acquire(&ptable.lock);
 
+
   for(;;){
     havekids = 0; 
     
@@ -541,9 +542,9 @@ int join(void** ustack) {
       release(&ptable.lock);
       return -1;
     }
-
     sleep(proc, &ptable.lock);
   }
+  return 0;
 }
 
 // some tight logic for park 

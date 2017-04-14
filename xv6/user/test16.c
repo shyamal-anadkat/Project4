@@ -27,20 +27,27 @@ main(int argc, char *argv[])
 {
    ppid = getpid();
 
+   printf(1, "before mutex_init\n");
    mutex_init(&lock);
 
-
+   printf(1, "before thread_create\n"); 
    int thread_pid = thread_create(worker, 0);
    assert(thread_pid > 0);
+   printf(1, "after thread_create\n"); 
 
-   sleep(20);
+   sleep(2);
+   printf(1, "before mutex_LOCK\n");
    mutex_lock(&lock);
+
    global = 2;
+   printf(1, "before CV_SIGNAL\n");
    cv_signal(&cond);
-   sleep(50);
+   printf(1, "after CV_SIGNAL\n");
+   sleep(5);
    global = 1;
    mutex_unlock(&lock);
 
+   printf(1, "BEFORE thread_join\n");
    int join_pid = thread_join();
    assert(join_pid == thread_pid);
 
@@ -50,10 +57,12 @@ main(int argc, char *argv[])
 
 void
 worker(void *arg_ptr) {
+  printf(1, "INSIDE WORKER_START\n");
   mutex_lock(&lock);
   assert(global == 0);
   cv_wait(&cond, &lock);
   assert(global == 1);
   mutex_unlock(&lock);
+   printf(1, "WORKER DONE\n");
   exit();
 }

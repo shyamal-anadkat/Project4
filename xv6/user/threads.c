@@ -43,7 +43,7 @@ int thread_join(void)
 
   void *ustack;
   int retVal =  join((&ustack));
-
+  
   //if join fails/pid is negative
   if(retVal == -1) {
     spin_unlock(&tjlock);
