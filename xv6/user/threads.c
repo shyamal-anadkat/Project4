@@ -23,11 +23,6 @@ int thread_create(void (*thfunc)(void*), void* arg)
     spin_unlock(&tclock);
     return -1; 
   }
-  
-  // //page align if not 
-  // if((uint)ustack % PGSIZE) {
-  // 	ustack = ustack + (PGSIZE - (uint)ustack % PGSIZE);
-  // }
 
   int pid = clone(thfunc, arg, (void*)ustack);
   //check if pid is neg ??

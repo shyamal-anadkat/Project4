@@ -28,7 +28,7 @@ void cv_wait(struct condvar* cv, struct mutex* mtx)
 void cv_signal(struct condvar* cv)
 {
 	mutex_lock(&cv->mtx);
-
+	//wakes up one waiting thread on signal
 	if (!isEmpty(&cv->queue)) {
 		unpark(dequeue(&cv->queue));
 	}

@@ -32,7 +32,7 @@ free(void *ap)
 
   bp = (Header*)ap - 1;
 
-  // lock free lock - finegrained ?
+  // lock free lock - finegrained
   spin_lock(&flock);
 
   for(p = freep; !(bp > p && bp < p->s.ptr); p = p->s.ptr)

@@ -30,13 +30,13 @@ void sem_wait(struct semaphore* sem)
 
 void sem_post(struct semaphore* sem)
 {
-		mutex_lock(&sem->mtx); //make atomic
-		
-		//increment sem value
-		sem->counter++;    
+	mutex_lock(&sem->mtx); //make atomic
+	
+	//increment sem value
+	sem->counter++;    
 
-		//wake one up 
-		cv_broadcast(&sem->cond);
+	//wake one up 
+	cv_broadcast(&sem->cond);
 
-	    mutex_unlock(&sem->mtx); //release mutex lock
+    mutex_unlock(&sem->mtx); //release mutex lock
 }

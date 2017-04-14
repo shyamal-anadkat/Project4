@@ -4,6 +4,7 @@
 #include "queue.h"
 #include "mutex.h"
 
+//stuct for condvar
 struct condvar {
 	struct Queue queue;
 	struct mutex mtx;

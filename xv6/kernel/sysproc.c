@@ -51,7 +51,6 @@ sys_sbrk(void)
     return -1;
   //this line will change
   //add lock
-  //TODO
   addr = proc->sz;
   if(growproc(n) < 0)
     return -1;
@@ -100,7 +99,9 @@ sys_clone(void)
   void* ustack;
   void* fn;
 
-  if(argptr(1, (void*)&arg, sizeof(arg)) < 0 || argptr(2, (void*)&ustack, sizeof(ustack)) < 0 || argptr(0, (void*)&fn, sizeof(fn)) < 0)
+  if(argptr(1, (void*)&arg, sizeof(arg)) < 0 || 
+     argptr(2, (void*)&ustack, sizeof(ustack)) < 0 || 
+     argptr(0, (void*)&fn, sizeof(fn)) < 0)
     return -1;
 
   return clone(fn, arg, ustack);

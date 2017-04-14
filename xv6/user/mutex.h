@@ -6,7 +6,6 @@
 struct mutex {
 	int flag;
 	int guard;
-    //queue_t *q;
     struct Queue queue;
 };
 

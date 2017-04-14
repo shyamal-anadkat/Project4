@@ -131,22 +131,22 @@ growproc(int n)
   struct proc *p;
   acquire(&ptable.lock);  //atomic 
 
-  if (proc->isThread==1) {
+  if (proc->isThread == 1) {
     for (p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
       //update size if p's parent is same as proc's parents
-      if (p->parent == proc->parent  && p->isThread==1)
+      if (p->parent == proc->parent  && p->isThread == 1)
         p->sz = sz;
-     }
-    proc->parent->sz = sz; 
+    }
+    proc->parent->sz = sz;  //update proc parent sz
   }
   else { 
    for (p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
-      if (p->parent == proc && p->isThread==1)
+      if (p->parent == proc && p->isThread == 1)
            p->sz = sz;
     }
   }
 
-  release(&ptable.lock);
+  release(&ptable.lock); //atomic end ---
 
   switchuvm(proc);
   return 0;
@@ -174,7 +174,6 @@ fork(void)
   }
 
   //set np->container to point to np
-  //TODO
   np->sz = proc->sz;
   np->parent = proc;
   *np->tf = *proc->tf;
@@ -249,7 +248,7 @@ wait(void)
     // Scan through table looking for zombie children.
     havekids = 0;
     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
-      if(p->parent != proc || p->isThread==1)
+      if(p->parent != proc || p->isThread==1) //p4 support 
         continue;
       havekids = 1;
       if(p->state == ZOMBIE){
@@ -455,9 +454,6 @@ int clone(void (*fn)(void*), void* arg, void* ustack) {
   void* sarg;
   void* retPC;
 
-  //check page-aligned
-  // if((uint)ustack % PGSIZE)
-  //   return -1;
   if((uint)ustack + PGSIZE > proc->sz)
     return -1;
 
@@ -469,7 +465,6 @@ int clone(void (*fn)(void*), void* arg, void* ustack) {
   np->parent = proc;
   np->pgdir = proc->pgdir;
 
-  //TODO
   //get rid of sz
   //point np->container = proc
   //point proc->container to proc
@@ -505,12 +500,10 @@ int clone(void (*fn)(void*), void* arg, void* ustack) {
 }
 
 int join(void** ustack) {
-
   //lot of stuff same as wait 
   struct proc *p;
   int havekids, pid;
   acquire(&ptable.lock);
-
 
   for(;;){
     havekids = 0; 
@@ -524,9 +517,9 @@ int join(void** ustack) {
 
       if(p->state == ZOMBIE){
         pid = p->pid;
-        kfree(p->kstack); // ?? SHOULD WE KFREE here, salil ?
+        kfree(p->kstack); //same as wait 
         p->kstack = 0;
-        *ustack = (void *)p->stack;
+        *ustack = (void *)p->stack;  //update USTACK
         p->state = UNUSED;
         p->pid = 0;
         p->parent = 0;
