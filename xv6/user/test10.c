@@ -38,7 +38,8 @@ int main()
 
   int i; 
   for(i = 0; i < 20; i++)
-  {
+  { 
+      printf(1, "Thread created %d\n", i);
       if(thread_create(&f,(void*)i) < 0)
            printf(2, "clone failed");
   }
@@ -53,6 +54,7 @@ int main()
 
   for(i = 0; i < 20; i++)
   {
+      printf(1, "Thread joined %d\n", i);
       thread_join();
   }
 

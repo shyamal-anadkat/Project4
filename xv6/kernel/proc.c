@@ -456,8 +456,8 @@ int clone(void (*fn)(void*), void* arg, void* ustack) {
   void* retPC;
 
   //check page-aligned
-  if((uint)ustack % PGSIZE)
-    return -1;
+  // if((uint)ustack % PGSIZE)
+  //   return -1;
   if((uint)ustack + PGSIZE > proc->sz)
     return -1;
 

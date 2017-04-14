@@ -1,7 +1,6 @@
 #include "types.h"
 #include "user.h"
 #include "fcntl.h"
-#include "threads.h"
 
 //****@Author : salil, shyamal****
 #define PGSIZE 4096
@@ -17,7 +16,7 @@ int thread_create(void (*thfunc)(void*), void* arg)
   
   void *ustack;
 
-  ustack = malloc(2*PGSIZE); //4096 * 2
+  ustack = malloc(1*PGSIZE); //4096 * 1
 
   //if malloc fails
   if (ustack == 0) {
@@ -25,10 +24,10 @@ int thread_create(void (*thfunc)(void*), void* arg)
     return -1; 
   }
   
-  //page align if not 
-  if((uint)ustack % PGSIZE) {
-  	ustack = ustack + (PGSIZE - (uint)ustack % PGSIZE);
-  }
+  // //page align if not 
+  // if((uint)ustack % PGSIZE) {
+  // 	ustack = ustack + (PGSIZE - (uint)ustack % PGSIZE);
+  // }
 
   int pid = clone(thfunc, arg, (void*)ustack);
   //check if pid is neg ??
@@ -39,7 +38,6 @@ int thread_create(void (*thfunc)(void*), void* arg)
 // THREAD JOIN
 int thread_join(void)
 {
-
   if (!tjlock.init) {spin_init(&tjlock);}
   spin_lock(&tjlock);
 

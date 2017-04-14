@@ -1,9 +1,10 @@
 #ifndef _USER_H_
 #define _USER_H_
 
+#include "queue.h"
 #include "spinlock.h"
 #include "threads.h"
-//#include "condvar.h"
+#include "condvar.h"
 #include "mutex.h"
 #include "semaphore.h"
 

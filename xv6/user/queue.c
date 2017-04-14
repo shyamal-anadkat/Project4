@@ -1,7 +1,6 @@
 #include "types.h"
 #include "user.h"
 #include "fcntl.h"
-#include "queue.h"
 
 //****COURTESY : GEEKS FOR GEEKS******
 struct Queue* initQueue(unsigned capacity)
