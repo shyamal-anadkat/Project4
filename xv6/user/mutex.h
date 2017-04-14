@@ -1,12 +1,13 @@
 #ifndef MUTEX_H
 #define MUTEX_H
+
 #include "queue.h"
 
 struct mutex {
 	int flag;
 	int guard;
     //queue_t *q;
-    struct Queue* queue;
+    struct Queue queue;
 };
 
 void mutex_init(struct mutex* mtx);
