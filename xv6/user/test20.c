@@ -31,6 +31,8 @@ main(int argc, char *argv[])
 {
   int i;
   ppid = getpid();
+  cv_init(&nonfull);
+  cv_init(&nonempty);
 
   mutex_init(&lock);
   bufsize = 0;

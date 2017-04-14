@@ -28,7 +28,8 @@ main(int argc, char *argv[])
    ppid = getpid();
 
    mutex_init(&lock);
-
+   cv_init(&cond2);
+   cv_init(&cond1);
 
    int thread_pid = thread_create(worker, 0);
    assert(thread_pid > 0);

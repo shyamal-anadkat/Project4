@@ -27,6 +27,7 @@ int
 main(int argc, char *argv[])
 {
    ppid = getpid();
+   cv_init(&cond);
 
    mutex_init(&lock);
 

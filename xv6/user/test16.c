@@ -26,6 +26,7 @@ int
 main(int argc, char *argv[])
 {
    ppid = getpid();
+   cv_init(&cond);
 
    printf(1, "before mutex_init\n");
    mutex_init(&lock);

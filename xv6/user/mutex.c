@@ -8,7 +8,7 @@ void mutex_init(struct mutex* mtx)
 {
 	mtx->flag  = 0;
 	mtx->guard = 0;
-    mtx->queue = *(initQueue(65));
+    mtx->queue = *(initQueue(200));
 }
 
 void mutex_lock(struct mutex* mtx)
