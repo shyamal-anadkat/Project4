@@ -1,11 +1,11 @@
 #include "types.h"
 #include "user.h"
 #include "x86.h"
-#include "spinlock.h"
 
 void spin_init(struct spinlock* lk)
 {
 	lk->flag = 0;
+	lk->init = 1;
 }
 
 void spin_lock(struct spinlock *lk)

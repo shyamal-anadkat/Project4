@@ -3,9 +3,7 @@
 #include "user.h"
 #include "param.h"
 
-// Memory allocator by Kernighan and Ritchie,
-// The C programming Language, 2nd ed.  Section 8.7.
-
+//******Project4 : Locking user libs (part2)*******//
 typedef long Align;
 
 union header {
@@ -18,21 +16,25 @@ union header {
 
 typedef union header Header;
 
-static struct spinlock mlock;
-static struct spinlock flock;
-
-
+//where malloc calls free and you have multiple locks
+static struct spinlock mlock; //malloc lock declare
+static struct spinlock flock; //free lock declare
 static Header base;
 static Header *freep;
 
 void
 free(void *ap)
 {
-  spin_init(&flock);
+  //only init if not already init.
+  if (!flock.init) {spin_init(&flock);}
+
   Header *bp, *p;
 
   bp = (Header*)ap - 1;
+
+  // lock free lock - finegrained ?
   spin_lock(&flock);
+
   for(p = freep; !(bp > p && bp < p->s.ptr); p = p->s.ptr)
     if(p >= p->s.ptr && (bp > p || bp < p->s.ptr))
       break;
@@ -48,6 +50,7 @@ free(void *ap)
     p->s.ptr = bp;
   freep = p;
 
+  //unlock free lock
   spin_unlock(&flock);
 }
 
@@ -72,17 +75,27 @@ void*
 malloc(uint nbytes)
 {
 
-  spin_init(&mlock);
+  //init if mlock not init previously held
+  if (!mlock.init) {spin_init(&mlock);}
+
+  //init if flock not init previously held
+  if (flock.init != 1) {spin_init(&flock);}
 
   Header *p, *prevp;
   uint nunits;
 
-  spin_lock(&mlock);
   nunits = (nbytes + sizeof(Header) - 1)/sizeof(Header) + 1;
+
+  //lock flock and mlock after init
+  spin_lock(&mlock);
+  spin_lock(&flock);
+
+  //START ATOMIC
   if((prevp = freep) == 0){
     base.s.ptr = freep = prevp = &base;
     base.s.size = 0;
   }
+
   for(p = prevp->s.ptr; ; prevp = p, p = p->s.ptr){
     if(p->s.size >= nunits){
       if(p->s.size == nunits)
@@ -93,11 +106,25 @@ malloc(uint nbytes)
         p->s.size = nunits;
       }
       freep = prevp;
+
+      //END ATOMIC
+      
+      //unlock before returning 
+      spin_unlock(&flock);
       spin_unlock(&mlock);
+
       return (void*)(p + 1);
     }
-    if(p == freep)
-      if((p = morecore(nunits)) == 0)
+    if(p == freep) {
+
+      //unlock flock before calling morecore which calls free
+      spin_unlock(&flock);
+
+      if((p = morecore(nunits)) == 0) {
+      //unlock mlock before return 
+      spin_unlock(&mlock);
         return 0;
+      }
+    }
   }
 }

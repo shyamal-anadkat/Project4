@@ -3,6 +3,7 @@
 
 struct spinlock {
 	uint flag;
+	int init;   //to indicate if the lock is initialized
 };
 
 void spin_init(struct spinlock* lk);

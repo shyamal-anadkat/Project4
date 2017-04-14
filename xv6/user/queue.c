@@ -3,6 +3,7 @@
 #include "fcntl.h"
 #include "queue.h"
 
+//****COURTESY : GEEKS FOR GEEKS******
 struct Queue* initQueue(unsigned capacity)
 {
     struct Queue* queue = (struct Queue*) malloc(sizeof(struct Queue));

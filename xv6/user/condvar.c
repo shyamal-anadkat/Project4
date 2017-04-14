@@ -40,6 +40,7 @@ void cv_signal(struct condvar* cv)
 void cv_broadcast(struct condvar* cv)
 {
 	mutex_lock(&cv->mtx);
+	
 	//wakes up all waiting thread
 	while (!isEmpty(&cv->queue)) {
 		//iterate through queue and keep dequeing
